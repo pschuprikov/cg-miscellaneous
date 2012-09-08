@@ -1,7 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "common_interfaces.h"
+#include "common.h"
 
 namespace enginegl
 {

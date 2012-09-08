@@ -12,11 +12,11 @@ TEMPLATE = lib
 INCLUDEPATH += include
 
 HEADERS += \
-    include/common_interfaces.h \
     include/engine.h \
     include/enginegl.h \
     include/savers_n_setters.h \
-    engine/shaders.h
+    engine/shaders.h \
+    include/common.h
 
 SOURCES += \
     engine/engine.cpp \
