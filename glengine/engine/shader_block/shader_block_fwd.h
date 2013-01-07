@@ -1,0 +1,4 @@
+#ifndef SHADER_BLOCK_FWD_H
+#define SHADER_BLOCK_FWD_H
+
+#endif // SHADER_BLOCK_FWD_H

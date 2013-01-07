@@ -1,4 +1,7 @@
 #include <glengine.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <GL/glut.h>
 #include <GL/glext.h>
 
@@ -31,25 +34,40 @@ void changeSize(int w, int h) {
 
 float angle = 0.0f;
 
+gle::program_ptr load_program()
+{
+    gle::program_ptr program;
+    try
+    {
+        program = eng->programs()->create_program("test");
+        gle::shader_ptr vs = eng->programs()->load_shader(
+                    "/home/pasha/repos/cg-miscellaneous/glengine_testing/vs.glsl", gle::ST_vertex);
+        gle::shader_ptr fs = eng->programs()->load_shader(
+                    "/home/pasha/repos/cg-miscellaneous/glengine_testing/fs.glsl", gle::ST_fragment);
+        program->attach_shader(vs);
+        program->attach_shader(fs);
+        program->link();
+    }
+    catch (gle::compilation_failed_exception_t const& cfe)
+    {
+        std::cerr << cfe.what();
+
+        std::cerr << "reason:\n";
+        std::cerr << cfe.reason();
+    }
+
+    return program;
+}
+
 void renderScene(void) {
 
     static gle::time_elapsed_query_ptr prq = eng->queries()->create_time_elapsed_query();
     static gle::primitives_generated_query_ptr prg = eng->queries()->create_primitives_generated_query();
     static gle::samples_passed_query_ptr spq = eng->queries()->create_samples_passed_query();
-    static gle::buffer_ptr vtx_buf = eng->buffers()->create_buffer();
-    static gle::buffer_ptr ind_buf = eng->buffers()->create_buffer();
-
-    float data[] = { -2.0f, -2.0f, 0.0f,
-                      2.0f,  0.0f, 0.0f,
-                      0.0f,  2.0f, 0.0f };
-    GLuint indicies[] = { 0, 1, 2 };
-    vtx_buf->buffer_data(gle::BU_static_draw, sizeof(data), data);
-    ind_buf->buffer_data(gle::BU_static_draw, sizeof(indicies), indicies);
-
-    eng->buffers()->buffer_target(gle::BTT_array)->bind_buffer(vtx_buf);
-    eng->buffers()->buffer_target(gle::BTT_element_array)->bind_buffer(ind_buf);
 
     static bool unanswered = false;
+
+    static gle::program_ptr program = load_program();
 
     if (!unanswered)
     {
@@ -61,27 +79,34 @@ void renderScene(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset transformations
-    glLoadIdentity();
+    glm::mat4 mv(1);
     // Set the camera
-    gluLookAt(	0.0f, 0.0f, 10.0f,
-                0.0f, 0.0f,  0.0f,
-                0.0f, 1.0f,  0.0f);
+    mv = glm::lookAt(glm::vec3(0.f, 0.f, 10.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
-    for (int i = 0; i < 1000; i++)
+    eng->programs()->use(program);
+
+    for (int i = 0; i < 1; i++)
     {
         double mult = i / 1000.;
 
-        glRotatef(angle + M_PI_2 * mult, 0.0f, 1.0f, 0.0f);
+        mv = glm::rotate(mv, angle, glm::vec3(0.f, 0.f, 1.f));
+
+        static glm::mat4 proj = glm::ortho<float>(-5, 5, -5, 5);
+
+        glm::mat4 mvp = proj * mv;
+        program->var("mvp")->set(mvp);
 
         mult = rand() / (double) RAND_MAX;
-        glColor3f(1 - mult * 0.5, mult, mult * 0.5);
+        program->var("color")->set(glm::vec4(1 - mult * 0.5, mult, mult * 0.5, 1));
 
-        GL_VERTEX_ARRAY
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBegin(GL_TRIANGLES);
+        glVertex3f(-2.0f, -2.0f, 0.0f);
+        glVertex3f(2.0f,  0.0f, 0.0f );
+        glVertex3f(0.0f,  2.0f, 0.0f );
+        glEnd();
     }
 
-    angle+=0.1f;
+    angle += 0.1f;
 
     if (!unanswered)
     {
@@ -91,9 +116,9 @@ void renderScene(void) {
         unanswered = true;
     }
 
-        std::cerr << prq->time_elapsed_ns() * 1.e-6 << "ms; " << prg->primitives_generated()
+    std::cerr << prq->time_elapsed_ns() * 1.e-6 << "ms; " << prg->primitives_generated()
               << " gen primitives; " << spq->samples_passed() << " samples_passed" << std::endl;
-        unanswered = false;
+    unanswered = false;
 
     glutSwapBuffers();
 }

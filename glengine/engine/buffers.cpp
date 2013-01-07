@@ -6,7 +6,7 @@ namespace gle
 {
 
     buffer_t::buffer_t(GLuint id)
-        : id_(id), size_(0), map_info_(), current_usage_(BU_unknown)
+        : id_(id), map_info_(), size_(0), current_usage_(BU_unknown)
     {}
 
     GLuint buffer_t::gl_id( ) const { return id_; }

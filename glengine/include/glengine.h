@@ -5,6 +5,7 @@
 
 #include <glequery_object_manager.h>
 #include <glebuffer_object_manager.h>
+#include <gleprogram_manager.h>
 
 namespace gle
 {
@@ -12,6 +13,7 @@ namespace gle
     {
         virtual i_query_object_manager * queries() = 0;
         virtual i_buffer_object_manager * buffers() = 0;
+        virtual i_program_manager * programs() = 0;
 
         virtual ~i_engine() {}
     };
