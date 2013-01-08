@@ -13,5 +13,6 @@ SOURCES += main.cpp
 
 OTHER_FILES += \
     vs.glsl \
-    fs.glsl
+    fs.glsl \
+    gs.glsl
 

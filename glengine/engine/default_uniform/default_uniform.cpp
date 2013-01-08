@@ -48,13 +48,13 @@ void default_uniform_t::set(glm::ivec4 xyzw)
 void default_uniform_t::set(glm::mat4 m)
 {
     glProgramUniformMatrix4fv(pid_, data_.location(),
-                              1, true, glm::value_ptr(m));
+                              1, false, glm::value_ptr(m));
 }
 
 void default_uniform_t::set(glm::mat3 m)
 {
     glProgramUniformMatrix3fv(pid_, data_.location(),
-                              1, true, glm::value_ptr(m));
+                              1, false, glm::value_ptr(m));
 }
 
 }

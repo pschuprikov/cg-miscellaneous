@@ -27,8 +27,11 @@ typedef boost::shared_ptr<i_shader_variable> shader_variable_ptr;
 
 struct i_shader_array
 {
+    virtual bool is_bounded() const = 0;
+
     virtual int size() const = 0;
-    virtual shader_variable_ptr operator[](int idx) = 0;
+    virtual int stride() const = 0;
+    virtual shader_variable_ptr get(int idx) = 0;
 };
 typedef boost::shared_ptr<i_shader_array> shader_array_ptr;
 

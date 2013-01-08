@@ -16,8 +16,8 @@ struct program_manager_t
     void use(program_ptr prg);
 
 private:
-    void delete_shader(i_shader * shd);
-    void delete_program(i_program * prg);
+    static void delete_shader(i_shader * shd);
+    static void delete_program(i_program * prg);
 
     static inline GLuint new_shader_id(shader_type_t type);
     static inline GLuint new_program_id();

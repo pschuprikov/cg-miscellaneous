@@ -5,7 +5,7 @@
 
 namespace gle
 {
-    shader_variable_ptr default_uniform_array_t::operator[](int idx)
+    shader_variable_ptr default_uniform_array_t::get(int idx)
     {
         return shader_variable_ptr(new default_uniform_t(pid_, data_[idx]),
                                    boost::bind(&::operator delete, _1));

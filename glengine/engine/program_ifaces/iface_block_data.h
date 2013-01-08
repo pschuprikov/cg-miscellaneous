@@ -35,6 +35,7 @@ public:
 
     int stride() const { return stride_; }
     int offset() const { return offset_; }
+    bool is_bounded() const { return size() != 0; }
 
     iface_block_variable_data_t const operator[](int idx) const
     {

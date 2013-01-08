@@ -42,7 +42,7 @@ shader_ptr program_manager_t::load_shader(std::string file_name, shader_type_t t
     src.push_back(std::string(&all_source[0], all_source.size()));
 
     shader_ptr shd = shader_ptr(new shader_t(file_name, new_shader_id(type), type),
-        boost::bind(&program_manager_t::delete_shader, this, _1));
+        boost::bind(&program_manager_t::delete_shader, _1));
 
     shd->source(src);
 
@@ -51,7 +51,8 @@ shader_ptr program_manager_t::load_shader(std::string file_name, shader_type_t t
 
 program_ptr program_manager_t::create_program(std::string name)
 {
-    return program_ptr(new program_t(name, new_program_id()));
+    return program_ptr(new program_t(name, new_program_id()),
+                       boost::bind(&program_manager_t::delete_program, _1));
 }
 
 void program_manager_t::use(program_ptr prg)

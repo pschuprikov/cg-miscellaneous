@@ -5,6 +5,7 @@
 #include "default_uniform/default_uniform.h"
 #include "default_uniform/default_uniform_array.h"
 #include "shader_block/shader_block.h"
+#include "shader_input/shader_input.h"
 
 namespace gle
 {
@@ -73,17 +74,32 @@ void program_t::link()
 
 shader_variable_ptr program_t::var(std::string name)
 {
-    return shader_variable_ptr(new default_uniform_t(id_, iface_storage_->var(name)));
+    return shader_variable_ptr(new default_uniform_t(id_, iface_storage_->var(name)),
+                               boost::bind(::operator delete, _1));
 }
 
 shader_array_ptr program_t::array(std::string name)
 {
-    return shader_array_ptr(new default_uniform_array_t(id_, iface_storage_->array(name)));
+    return shader_array_ptr(new default_uniform_array_t(id_, iface_storage_->array(name)),
+                            boost::bind(::operator delete, _1));
 }
 
-shader_block_ptr program_t::get_shader_block(std::string const& name)
+shader_block_ptr program_t::block(std::string const& name)
 {
-    return shader_block_ptr(new shader_block_t(id_, iface_storage_->block(name)));
+    return shader_block_ptr(new shader_block_t(id_, iface_storage_->block(name)),
+                            boost::bind(::operator delete, _1));
+}
+
+shader_input_variable_ptr program_t::input_var(std::string const& name)
+{
+    return shader_input_variable_ptr(new shader_input_variable_t(id_, iface_storage_->input_var(name)),
+                                     boost::bind(::operator delete, _1));
+}
+
+shader_input_array_ptr program_t::input_array(std::string const& name)
+{
+    return shader_input_array_ptr(new shader_input_array_t(id_, iface_storage_->input_array(name)),
+                                  boost::bind(::operator delete, _1));
 }
 
 }

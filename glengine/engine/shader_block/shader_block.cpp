@@ -7,7 +7,8 @@ namespace gle
 
 mapped_block_adaptor_ptr shader_block_t::mapped_adapter() const
 {
-    return mapped_block_adaptor_ptr(new mapped_block_adaptor_t(pid_, data_));
+    return mapped_block_adaptor_ptr(new mapped_block_adaptor_t(pid_, data_),
+                                    boost::bind(::operator delete, _1));
 }
 
 void shader_block_t::set_binding(int idx)

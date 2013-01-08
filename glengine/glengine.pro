@@ -24,7 +24,12 @@ SOURCES += \
     engine/shader_block/shader_block_array.cpp \
     engine/shader_block/mapped_block_adaptor.cpp \
     engine/program_ifaces/iface_storage.cpp \
-    engine/shader_block/shader_block.cpp
+    engine/shader_block/shader_block.cpp \
+    engine/program_ifaces/iface_input_data.cpp \
+    engine/shader_input/shader_input.cpp \
+    engine/vertex_format.cpp \
+    engine/vertex_array_manager.cpp \
+    engine/vertex_array.cpp
 
 LIBS += -lGLEW
 
@@ -67,5 +72,13 @@ HEADERS += \
     engine/program_ifaces/iface_default_data.h \
     engine/program_ifaces/iface_block_data.h \
     engine/program_ifaces/iface_storage.h \
-    engine/program_ifaces/iface_storage_fwd.h
+    engine/program_ifaces/iface_storage_fwd.h \
+    engine/program_ifaces/iface_input_data.h \
+    include/gleshader_input.h \
+    engine/shader_input/shader_input.h \
+    include/glevertex_array.h \
+    include/glevertex_format.h \
+    engine/vertex_array_manager.h \
+    include/glevertex_array_manager.h \
+    engine/vertex_array.h
 

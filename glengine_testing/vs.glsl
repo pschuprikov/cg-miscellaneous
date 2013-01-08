@@ -1,10 +1,13 @@
 #version 430
 
-layout(location = 0) in vec4 pos;
+layout(location = 0) in vec3 in_pos;
 
-uniform mat4 mvp;
+out vs_output
+{
+    vec3 pos;
+} v_out;
 
 void main(void)
 {
-    gl_Position = mvp * pos;
+    v_out.pos = in_pos;
 }

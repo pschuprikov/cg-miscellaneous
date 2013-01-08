@@ -17,8 +17,11 @@ struct default_uniform_array_t
         , data_(data)
     {}
 
+    bool is_bounded() const { return true; }
     int size() const { return data_.size(); }
-    shader_variable_ptr operator[](int idx);
+    int stride() const { return 0; }
+
+    shader_variable_ptr get(int idx);
 
 private:
     GLuint pid_;

@@ -29,7 +29,12 @@ struct program_t
 
     std::string const& name() const { return name_; }
 
-    shader_block_ptr get_shader_block(std::string const& name);
+    // interfaces:
+
+    shader_block_ptr block(std::string const& name);
+
+    shader_input_variable_ptr input_var(std::string const& name);
+    shader_input_array_ptr input_array(std::string const& name);
 
     // i_shader_variables_provider
 public:

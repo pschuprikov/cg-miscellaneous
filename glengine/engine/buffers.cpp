@@ -30,6 +30,7 @@ namespace gle
 
     void buffer_t::buffer_data( buffer_usage_t usage, size_t size, const void * data )
     {
+        current_usage_ = usage;
         glNamedBufferDataEXT(id_, size, data, gl_buffer_usage(usage));
     }
 

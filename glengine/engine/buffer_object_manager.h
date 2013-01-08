@@ -18,7 +18,7 @@ struct buffer_object_manager_t
     i_buffer_target_t * buffer_target( buffer_target_type_t target );
 
 private:
-    void delete_buffer( i_buffer * const bt );
+    static void delete_buffer( i_buffer * const bt );
 
 private:
     typedef boost::shared_ptr<i_buffer_target_t> buffer_target_ptr;

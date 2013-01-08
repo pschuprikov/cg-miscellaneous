@@ -20,9 +20,11 @@ public:
 
     // i_shader_array
 public:
-    int size() const { return data_.size(); }
+    bool is_bounded() const { return data_.is_bounded(); }
 
-    shader_variable_ptr operator[](int idx);
+    int size() const { return data_.size(); }
+    int stride() const { return data_.stride(); }
+    shader_variable_ptr get(int idx);
 
 private:
     mapped_block_adaptor_t const * adaptor_;

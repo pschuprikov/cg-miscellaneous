@@ -28,7 +28,7 @@ buffer_ptr buffer_object_manager_t::create_buffer( )
 {
     GLuint id;
     glGenBuffers(1, &id);
-    return buffer_ptr(new buffer_t(id), boost::bind(&buffer_object_manager_t::delete_buffer, this, _1));
+    return buffer_ptr(new buffer_t(id), boost::bind(&buffer_object_manager_t::delete_buffer, _1));
 }
 
 void buffer_object_manager_t::delete_buffer( i_buffer * bt )
