@@ -43,16 +43,6 @@ void vertex_array_manager_t::delete_vertex_array(i_vertex_array * array)
     storage_->vaos.erase(id);
 }
 
-void vertex_array_manager_t::enable_vertex_attrib_array(int idx) const
-{
-    glEnableVertexAttribArray(idx);
-}
-
-void vertex_array_manager_t::disable_vertex_attrib_array(int idx) const
-{
-    glDisableVertexAttribArray(idx);
-}
-
 void vertex_array_manager_t::draw_arrays(drawing_mode_t mode, int first, int count)
 {
     glDrawArrays(mode, first, count);

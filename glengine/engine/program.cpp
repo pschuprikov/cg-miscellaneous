@@ -6,6 +6,7 @@
 #include "default_uniform/default_uniform_array.h"
 #include "shader_block/shader_block.h"
 #include "shader_input/shader_input.h"
+#include "shader_output/shader_output.h"
 
 namespace gle
 {
@@ -82,6 +83,18 @@ shader_array_ptr program_t::array(std::string name)
 {
     return shader_array_ptr(new default_uniform_array_t(id_, iface_storage_->array(name)),
                             boost::bind(::operator delete, _1));
+}
+
+shader_output_variable_ptr program_t::output_var(std::string const& name)
+{
+    return shader_output_variable_ptr(new shader_output_variable_t(id_, iface_storage_->output_var(name)),
+                                      boost::bind(::operator delete, _1));
+}
+
+shader_output_array_ptr program_t::output_array(std::string const& name)
+{
+    return shader_output_array_ptr(new shader_output_array_t(id_, iface_storage_->output_array(name)),
+                                   boost::bind(::operator delete, _1));
 }
 
 shader_block_ptr program_t::block(std::string const& name)

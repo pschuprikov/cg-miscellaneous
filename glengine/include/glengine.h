@@ -7,6 +7,8 @@
 #include <glebuffer_object_manager.h>
 #include <gleprogram_manager.h>
 #include <glevertex_array_manager.h>
+#include <gletexture_manager.h>
+#include <gleframebuffer_manager.h>
 
 namespace gle
 {
@@ -21,7 +23,9 @@ namespace gle
                                 MBB_texture_update = GL_TEXTURE_UPDATE_BARRIER_BIT,
                                 MBB_buffer_update = GL_BUFFER_UPDATE_BARRIER_BIT,
                                 MBB_framebuffer = GL_FRAMEBUFFER_BARRIER_BIT,
-                                MBB_tranform_feedback = GL_TRANSFORM_FEEDBACK_BARRIER_BIT };
+                                MBB_tranform_feedback = GL_TRANSFORM_FEEDBACK_BARRIER_BIT,
+                                MBB_all = GL_ALL_BARRIER_BITS
+                              };
 
     inline memory_barrier_bit_t operator|(memory_barrier_bit_t lhs, memory_barrier_bit_t rhs)
     {
@@ -43,12 +47,25 @@ namespace gle
         virtual i_buffer_object_manager * buffers() = 0;
         virtual i_program_manager * programs() = 0;
         virtual i_vertex_array_manager * vaos() = 0;
+        virtual i_texture_manager * textures() = 0;
+        virtual i_framebuffer_manager * fbos() = 0;
 
+        // memory access synchronization
         virtual void memory_barrier(memory_barrier_bit_t barriers) = 0;
+
+        // compute shaders
+        virtual void dispatch_compute(int gx, int gy, int gz) = 0;
 
         // whole framebuffer operations
         virtual void clear(bit_plane_bit_t bit_plane_mask) = 0;
         virtual void clear_color(glm::vec4 color) = 0;
+
+        // error_stuff
+        virtual GLenum get_error() = 0;
+        virtual char const * get_error_string(GLenum error) const = 0;
+
+        // viewport
+        virtual void viewport(int x, int y, int width, int height) = 0;
 
         virtual ~i_engine() {}
     };

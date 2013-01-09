@@ -10,6 +10,8 @@ struct iface_storage_t::storage_impl_t
     std::map<std::string, iface_block_data_ptr> blocks;
     input_vars_map_t input_vars;
     input_arrays_map_t input_arrays;
+    output_vars_map_t output_vars;
+    output_arrays_map_t output_arrays;
 };
 
 iface_storage_t::iface_storage_t(GLuint pid)
@@ -17,6 +19,7 @@ iface_storage_t::iface_storage_t(GLuint pid)
     , storage_impl_(new storage_impl_t())
 {
     fill_input();
+    fill_output();
     fill_default();
     fill_block(SBT_uniform);
     fill_block(SBT_storage);
@@ -28,6 +31,11 @@ iface_storage_t::~iface_storage_t() {}
 void iface_storage_t::fill_input()
 {
     gle::fill_input(pid_, storage_impl_->input_vars, storage_impl_->input_arrays);
+}
+
+void iface_storage_t::fill_output()
+{
+    gle::fill_output(pid_, storage_impl_->output_vars, storage_impl_->output_arrays);
 }
 
 iface_default_array_data_t const& iface_storage_t::array(std::string const& name)
@@ -54,6 +62,17 @@ iface_input_array_data_t const& iface_storage_t::input_array(std::string const& 
 {
     return storage_impl_->input_arrays.at(name);
 }
+
+iface_output_variable_data_t const& iface_storage_t::output_var(std::string const& name)
+{
+    return storage_impl_->output_vars.at(name);
+}
+
+iface_output_array_data_t const& iface_storage_t::output_array(std::string const& name)
+{
+    return storage_impl_->output_arrays.at(name);
+}
+
 
 void iface_storage_t::fill_default()
 {

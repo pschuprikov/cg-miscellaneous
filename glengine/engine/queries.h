@@ -21,11 +21,15 @@ namespace gle
         GLenum gl_target() const { return target_; }
 
     protected:
+        virtual bool is_created() const = 0;
+        virtual bool is_active() const = 0;
+
         GLint64 get_result() const;
 
     private:
         GLuint id_;
-        GLenum target_;        GLuint idx_;
+        GLenum target_;
+        GLuint idx_;
     };
 
     struct bounded_query_t
@@ -35,12 +39,21 @@ namespace gle
     protected:
         bounded_query_t(GLuint id, GLenum target, GLuint idx)
             : query_t(id, target, idx)
+            , is_created_(false)
         {}
 
     // i_bounded_query
     public:
         void begin_query();
         void end_query();
+
+    protected:
+        bool is_created() const { return is_created_; }
+        bool is_active() const { return is_active_; }
+
+    private:
+        bool is_created_;
+        bool is_active_;
     };
 
     struct primitives_generated_query_t
@@ -88,7 +101,18 @@ namespace gle
     {
         timestamp_query_t(GLuint id);
 
-        long long timestamp() const { return get_result(); }
+        long long timestamp() const
+        {
+            is_created_ = true;
+            return get_result();
+        }
+
+    protected:
+        bool is_created() const { return is_created_; }
+        bool is_active() const { return false; }
+
+    private:
+        mutable bool is_created_;
     };
 
     struct any_samples_passed_query_t

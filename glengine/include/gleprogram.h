@@ -5,6 +5,7 @@
 #include <gleshader_block.h>
 #include <gleshader_variable.h>
 #include <gleshader_input.h>
+#include <gleshader_output.h>
 
 namespace gle
 {
@@ -31,6 +32,9 @@ struct i_program
 
     virtual shader_input_variable_ptr input_var(std::string const& name) = 0;
     virtual shader_input_array_ptr input_array(std::string const& name) = 0;
+
+    virtual shader_output_variable_ptr output_var(std::string const& name) = 0;
+    virtual shader_output_array_ptr output_array(std::string const& name) = 0;
 
     virtual ~i_program() {}
 };

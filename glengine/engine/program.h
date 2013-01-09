@@ -36,6 +36,9 @@ struct program_t
     shader_input_variable_ptr input_var(std::string const& name);
     shader_input_array_ptr input_array(std::string const& name);
 
+    shader_output_variable_ptr output_var(std::string const& name);
+    shader_output_array_ptr output_array(std::string const& name);
+
     // i_shader_variables_provider
 public:
     shader_variable_ptr var(std::string name);

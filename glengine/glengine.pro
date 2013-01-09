@@ -29,7 +29,15 @@ SOURCES += \
     engine/shader_input/shader_input.cpp \
     engine/vertex_format.cpp \
     engine/vertex_array_manager.cpp \
-    engine/vertex_array.cpp
+    engine/vertex_array.cpp \
+    engine/textures/texture.cpp \
+    engine/textures/buffer_texture.cpp \
+    engine/texture_manager.cpp \
+    engine/program_ifaces/iface_output_data.cpp \
+    engine/shader_output/shader_output.cpp \
+    engine/framebuffer/framebuffer_attachment.cpp \
+    engine/framebuffer/framebuffer.cpp \
+    engine/framebuffer_manager.cpp
 
 LIBS += -lGLEW
 
@@ -80,5 +88,19 @@ HEADERS += \
     include/glevertex_format.h \
     engine/vertex_array_manager.h \
     include/glevertex_array_manager.h \
-    engine/vertex_array.h
+    engine/vertex_array.h \
+    include/gletexture.h \
+    include/gletexture_manager.h \
+    engine/textures/texture.h \
+    engine/textures/buffer_texture.h \
+    engine/texture_manager.h \
+    include/gleshader_output.h \
+    engine/program_ifaces/iface_output_data.h \
+    engine/shader_output/shader_output.h \
+    include/gleframebuffer.h \
+    include/gleframebuffer_manager.h \
+    engine/framebuffer/framebuffer.h \
+    engine/framebuffer/framebuffer_attachment.h \
+    utils/stl_utils.h \
+    engine/framebuffer_manager.h
 

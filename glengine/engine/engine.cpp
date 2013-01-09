@@ -24,4 +24,33 @@ void engine_t::clear_color(glm::vec4 color)
     glClearColor(color.r, color.g, color.b, color.a);
 }
 
+void engine_t::dispatch_compute(int gx, int gy, int gz)
+{
+    glDispatchCompute(gx, gy, gz);
+}
+
+void engine_t::viewport(int x, int y, int width, int height)
+{
+    glViewport(x, y, width, height);
+}
+
+GLenum engine_t::get_error()
+{
+    return glGetError();
+}
+
+char const * engine_t::get_error_string(GLenum error) const
+{
+    switch (error)
+    {
+    case GL_NO_ERROR : return "No error";
+    case GL_INVALID_ENUM: return "Invalid enum";
+    case GL_INVALID_OPERATION : return "Invalid operation";
+    case GL_INVALID_VALUE: return "Invalid value";
+    case GL_INVALID_FRAMEBUFFER_OPERATION: return "Invalid framebuffer operation";
+    default : return "Unknown error";
+    }
+}
+
+
 }

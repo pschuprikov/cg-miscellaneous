@@ -19,6 +19,12 @@ GLuint program_manager_t::new_program_id()
     return glCreateProgram();
 }
 
+void program_manager_t::reset_program_in_use()
+{
+    glUseProgram(0);
+    in_use_.reset();
+}
+
 void program_manager_t::delete_shader(i_shader *shd)
 {
     GLuint id = shd->gl_id();

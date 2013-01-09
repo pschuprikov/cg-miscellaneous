@@ -6,6 +6,7 @@
 #include "iface_default_data.h"
 #include "iface_block_data.h"
 #include "iface_input_data.h"
+#include "iface_output_data.h"
 
 namespace gle
 {
@@ -20,11 +21,14 @@ struct iface_storage_t
     iface_block_data_ptr const& block(std::string const& name);
     iface_input_variable_data_t const& input_var(std::string const& name);
     iface_input_array_data_t const& input_array(std::string const& name);
+    iface_output_variable_data_t const& output_var(std::string const& name);
+    iface_output_array_data_t const& output_array(std::string const& name);
 
 private:
     struct storage_impl_t;
 
 private:
+    void fill_output();
     void fill_input();
     void fill_default();
     void fill_block(shader_block_type_t type);

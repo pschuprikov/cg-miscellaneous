@@ -15,15 +15,17 @@ out gs_output
     vec2 color;
 } g_out;
 
+uniform sampler1D tex_colors;
+
 void main(void)
 {
-    g_out.color = vec2(1, 0);
+    g_out.color = texelFetch(tex_colors, 0, 0).xy;
     gl_Position = mvp * vec4(g_in[0].pos, 1);
     EmitVertex();
-    g_out.color = vec2(0, 1);
+    g_out.color = texelFetch(tex_colors, 1, 0).xy;
     gl_Position = mvp * vec4(g_in[1].pos, 1);
     EmitVertex();
-    g_out.color = vec2(1, 1);
+    g_out.color = texelFetch(tex_colors, 2, 0).xy;
     gl_Position = mvp * vec4(g_in[2].pos, 1);
     EmitVertex();
 }

@@ -13,6 +13,7 @@ struct i_program_manager
 
     virtual program_ptr program_in_use() const = 0;
     virtual void use(program_ptr prg) = 0;
+    virtual void reset_program_in_use() = 0;
 };
 
 }

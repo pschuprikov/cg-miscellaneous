@@ -42,6 +42,7 @@ namespace gle
     {
         applied_ = false;
         storage_->attribs.insert(std::make_pair(var->location(), storage_t::attrib_data_t(var, fmt, binding)));
+        glEnableVertexArrayAttribEXT(id_, var->location());
     }
 
     void vertex_array_t::apply_bindings()
@@ -76,6 +77,7 @@ namespace gle
     {
         applied_ = false;
         storage_->attribs.erase(var->location());
+        glDisableVertexArrayAttribEXT(id_, var->location());
     }
 
     vertex_attrib_binding_t vertex_array_t::bind_buffer(buffer_ptr buf, int offset, int stride)

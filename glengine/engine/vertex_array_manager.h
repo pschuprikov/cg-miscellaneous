@@ -19,9 +19,6 @@ public:
     void set_current(vertex_array_ptr vao);
     void reset_current() { current_.reset(); }
 
-    void enable_vertex_attrib_array(int idx) const;
-    void disable_vertex_attrib_array(int idx) const;
-
     void draw_arrays(drawing_mode_t mode, int first, int count);
     void draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies);
 

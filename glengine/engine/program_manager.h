@@ -14,6 +14,7 @@ struct program_manager_t
 
     program_ptr program_in_use() const { return in_use_; }
     void use(program_ptr prg);
+    void reset_program_in_use();
 
 private:
     static void delete_shader(i_shader * shd);
