@@ -19,9 +19,6 @@ public:
     void set_current(vertex_array_ptr vao);
     void reset_current();
 
-    void draw_arrays(drawing_mode_t mode, int first, int count);
-    void draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies);
-
 private:
     void delete_vertex_array(i_vertex_array * array);
 

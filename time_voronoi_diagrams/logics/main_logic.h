@@ -5,7 +5,8 @@
 
 #include "../logics.h"
 
-#include "line_builder.h"
+#include "lines_builder.h"
+#include "voronoi_diagram.h"
 
 namespace tvd
 {
@@ -18,6 +19,9 @@ struct main_logic_t
     main_logic_t()
         : proc_(0)
     {}
+
+    lines_builder_ptr lines_builder() const { return lines_builder_; }
+    voronoi_diagram_ptr voronoi() const { return voronoi_; }
 
     void treat(i_io_provider * io);
     void set_processor(i_logic_processor * proc) { proc_ = proc; }
@@ -33,7 +37,8 @@ struct main_logic_t
 private:
     i_logic_processor * proc_;
 
-    line_builder_ptr line_builder_;
+    lines_builder_ptr lines_builder_;
+    voronoi_diagram_ptr voronoi_;
 };
 
 typedef boost::shared_ptr<main_logic_t> main_logic_ptr;

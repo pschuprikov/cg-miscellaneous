@@ -1,3 +1,5 @@
+#include <bitset>
+
 #include "engine.h"
 
 gle::i_engine * gle::default_engine()
@@ -51,6 +53,36 @@ void engine_t::set_viewport(viewport_t const& vp)
 {
     viewport_ = vp;
     glViewport(vp.x(), vp.y(), vp.width(), vp.height());
+}
+
+
+void engine_t::draw_arrays(drawing_mode_t mode, int first, int count)
+{
+    glDrawArrays(mode, first, count);
+}
+
+void engine_t::draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies)
+{
+    glDrawElements(mode, count, type, indicies);
+}
+
+void engine_t::enable(engine_state_bit_t bits)
+{
+    if (bits & ES_depth_test)
+        glEnable(gl_state(ES_depth_test));
+}
+
+void engine_t::disable(engine_state_bit_t bits)
+{
+    if (bits & ES_depth_test)
+        glDisable(gl_state(ES_depth_test));
+}
+
+void engine_t::blit_framebuffer(int src_x0, int src_y0, int src_x1, int src_y1,
+                                int dst_x0, int dst_y0, int dst_x1, int dst_y1,
+                                bit_plane_bit_t mask, framebuffer_filter_t filter)
+{
+    glBlitFramebuffer(src_x0, src_y0, src_x1, src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter);
 }
 
 

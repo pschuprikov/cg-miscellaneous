@@ -37,7 +37,7 @@ void line_renderer_t::render_line(const line_data_t &data)
     gle::default_engine()->vaos()->set_current(vao_);
 
     glLineWidth(5.0);
-    gle::default_engine()->vaos()->draw_arrays(gle::DM_lines_strip, 0, data.count());
+    gle::default_engine()->draw_arrays(gle::DM_line_strip, 0, data.count());
 
     gle::default_engine()->programs()->reset_program_in_use();
     gle::default_engine()->vaos()->reset_current();

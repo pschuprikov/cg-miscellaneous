@@ -24,9 +24,9 @@ mouse_input_info_t::mouse_input_info_t(int button, int x, int y)
 {
     switch(button)
     {
-    case GLUT_LEFT_BUTTON : btn_ = MB_left;
-    case GLUT_RIGHT_BUTTON : btn_ = MB_right;
-    case GLUT_MIDDLE_BUTTON : btn_ = MB_middle;
+    case GLUT_LEFT_BUTTON : btn_ = MB_left; break;
+    case GLUT_RIGHT_BUTTON : btn_ = MB_right; break;
+    case GLUT_MIDDLE_BUTTON : btn_ = MB_middle; break;
     }
 }
 

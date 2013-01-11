@@ -34,6 +34,7 @@ input_manager_t * input_manager_t::instance()
         glutKeyboardFunc(keyboard_func);
         glutMouseFunc(mouse_func);
         glutPassiveMotionFunc(passive_motion_func);
+        glutMotionFunc(passive_motion_func);
     }
     return &im;
 }

@@ -43,6 +43,25 @@ namespace gle
         return bit_plane_bit_t((int) lhs | (int) rhs);
     }
 
+    enum engine_state_bit_t { ES_depth_test = 1 };
+
+    inline engine_state_bit_t operator|(engine_state_bit_t lhs, engine_state_bit_t rhs)
+    {
+        return engine_state_bit_t((int) lhs | (int) rhs);
+    }
+
+    inline GLenum gl_state(engine_state_bit_t st)
+    {
+        switch(st)
+        {
+        case ES_depth_test : return GL_DEPTH_TEST;
+        default : return 0;
+        }
+    }
+
+    enum framebuffer_filter_t { FF_linear = GL_LINEAR, FF_nearest = GL_NEAREST };
+
+
     struct i_engine
     {
         virtual i_query_object_manager *  queries() = 0;
@@ -51,6 +70,10 @@ namespace gle
         virtual i_vertex_array_manager *     vaos() = 0;
         virtual i_texture_manager *      textures() = 0;
         virtual i_framebuffer_manager *      fbos() = 0;
+
+        // vertex arrays
+        virtual void draw_arrays(drawing_mode_t mode, int first, int count) = 0;
+        virtual void draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies) = 0;
 
         // memory access synchronization
         virtual void memory_barrier(memory_barrier_bit_t barriers) = 0;
@@ -61,6 +84,9 @@ namespace gle
         // whole framebuffer operations
         virtual void clear(bit_plane_bit_t bit_plane_mask) = 0;
         virtual void clear_color(glm::vec4 color) = 0;
+        virtual void blit_framebuffer(int src_x0, int src_y0, int src_x1, int src_y1,
+                                      int dst_x0, int dst_y0, int dst_x1, int dst_y1,
+                                      bit_plane_bit_t mask, framebuffer_filter_t filter) = 0;
 
         // error_stuff
         virtual GLenum get_error() = 0;
@@ -69,6 +95,10 @@ namespace gle
         // viewport
         virtual viewport_t const& viewport() const = 0;
         virtual void set_viewport(viewport_t const& vp) = 0;
+
+        // state management
+        virtual void enable(engine_state_bit_t bits) = 0;
+        virtual void disable(engine_state_bit_t bits) = 0;
 
         virtual ~i_engine() {}
     };

@@ -29,9 +29,9 @@ void core_t::run(logic_ptr start_logic, int x, int y, int width, int height, std
 
     glutIdleFunc(idle_func);
 
-    logics_.reset(new logic_processor_t(start_logic));
     input_manager_t::instance();
     render_manager_t::instance();
+    logics_.reset(new logic_processor_t(start_logic));
     // enter GLUT event processing cycle
     glutMainLoop();
 }

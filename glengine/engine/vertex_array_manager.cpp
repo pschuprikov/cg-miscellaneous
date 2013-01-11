@@ -15,7 +15,7 @@ vertex_array_ptr vertex_array_manager_t::create_vertex_array()
 {
     GLuint id;
     glGenVertexArrays(1, &id);
-    storage_t::vertex_array_impl_ptr vao_ptr(new vertex_array_t(id),
+    storage_t::vertex_array_impl_ptr vao_ptr(new vertex_array_t(id, this),
         boost::bind(&vertex_array_manager_t::delete_vertex_array, this, _1));
     storage_->vaos.insert(std::make_pair(id, storage_t::vertex_array_impl_weakptr(vao_ptr)));
     return vao_ptr;
@@ -50,16 +50,6 @@ void vertex_array_manager_t::delete_vertex_array(i_vertex_array * array)
     glDeleteVertexArrays(1, &id);
     delete array;
     storage_->vaos.erase(id);
-}
-
-void vertex_array_manager_t::draw_arrays(drawing_mode_t mode, int first, int count)
-{
-    glDrawArrays(mode, first, count);
-}
-
-void vertex_array_manager_t::draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies)
-{
-    glDrawElements(mode, count, type, indicies);
 }
 
 }

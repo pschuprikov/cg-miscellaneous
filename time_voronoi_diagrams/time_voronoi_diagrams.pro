@@ -13,7 +13,13 @@ SOURCES += main.cpp \
     core/core.cpp \
     logics/line_builder.cpp \
     renderers/line_renderer.cpp \
-    logics/main_logic.cpp
+    logics/main_logic.cpp \
+    logics/lines_builder.cpp \
+    logics/voronoi_diagram.cpp \
+    logics/gpgpu_vd/lines_prepare.cpp \
+    logics/gpgpu_vd/rasterizer.cpp \
+    logics/gpgpu_vd/voronoi_texdraw.cpp \
+    logics/gpgpu_vd/jump_flood.cpp
 
 PRECOMPILED_HEADER = stdafx.h
 
@@ -38,8 +44,19 @@ HEADERS += \
     logics/lines_builder.h \
     logics/main_logic_fwd.h \
     renderers/line_renderer.h \
-    logics/invalidator.h
+    logics/invalidator.h \
+    logics/voronoi_diagram.h \
+    logics/gpgpu_vd/lines_prepare.h \
+    logics/gpgpu_vd/rasterizer.h \
+    logics/gpgpu_vd/voronoi_texdraw.h \
+    logics/gpgpu_vd/jump_flood.h
 
 OTHER_FILES += \
     shaders/line/vs.glsl \
-    shaders/line/fs.glsl
+    shaders/line/fs.glsl \
+    shaders/rasterizer/vs.glsl \
+    shaders/rasterizer/fs.glsl \
+    shaders/rasterizer/gs.glsl \
+    shaders/texdraw/vs.glsl \
+    shaders/texdraw/fs.glsl \
+    shaders/jump_flood/cs.glsl

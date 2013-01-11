@@ -2,6 +2,7 @@
 #define VERTEX_ARRAY_H
 
 #include <glevertex_array.h>
+#include <glevertex_array_manager.h>
 
 namespace gle
 {
@@ -9,7 +10,7 @@ namespace gle
 struct vertex_array_t
     : i_vertex_array
 {
-    vertex_array_t(GLuint id);
+    vertex_array_t(GLuint id, i_vertex_array_manager * owner);
     ~vertex_array_t();
 
     void apply()
@@ -57,6 +58,8 @@ private:
     bool bindings_applied_;
 
     boost::scoped_ptr<storage_t> storage_;
+
+    i_vertex_array_manager * owner_;
 };
 
 }

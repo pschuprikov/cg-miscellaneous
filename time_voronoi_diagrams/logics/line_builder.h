@@ -33,12 +33,15 @@ public:
 
     // i_input_listener
 public:
-    void key_pressed(const i_keyboard_input_info *ev);
     void mouse_down(const i_mouse_input_info *ev);
+    void mouse_move(const i_input_info * ev);
 
     // i_renderable
 public:
     void render();
+
+private:
+    line_vertex_t get_vertex(const i_input_info *ev);
 
 private:
     boost::scoped_ptr<line_data_t> line_data_;

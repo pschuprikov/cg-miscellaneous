@@ -9,7 +9,7 @@ namespace gle
 
 enum drawing_mode_t { DM_triangles = GL_TRIANGLES,
                       DM_lines = GL_LINES,
-                      DM_lines_strip = GL_LINE_STRIP,
+                      DM_line_strip = GL_LINE_STRIP,
                       DM_triangle_strip = GL_TRIANGLE_STRIP
                     };
 
@@ -20,9 +20,6 @@ struct i_vertex_array_manager
     virtual void set_current(vertex_array_ptr vao) = 0;
     virtual void reset_current() = 0;
     virtual vertex_array_ptr current() const = 0;
-
-    virtual void draw_arrays(drawing_mode_t mode, int first, int count) = 0;
-    virtual void draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies) = 0;
 };
 
 }

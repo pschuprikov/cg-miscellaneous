@@ -44,11 +44,12 @@ namespace gle
         binding_map_t buffers;
     };
 
-    vertex_array_t::vertex_array_t(GLuint id)
+    vertex_array_t::vertex_array_t(GLuint id, i_vertex_array_manager *owner)
         : id_(id)
         , attribs_applied_(true)
         , bindings_applied_(true)
         , storage_(new storage_t())
+        , owner_(owner)
     {}
 
     void vertex_array_t::add_vertex_attrib(shader_input_variable_ptr var, vertex_format_ptr fmt,
@@ -125,6 +126,8 @@ namespace gle
         storage_->buffers.at(binding).buf = buf;
         storage_->buffers.at(binding).offset = offset;
         storage_->buffers.at(binding).stride = stride;
+        if (owner_->current() && owner_->current().get() == static_cast<i_vertex_array *>(this))
+            apply();
     }
 
     buffer_ptr vertex_array_t::binding(vertex_attrib_binding_t binding) const
@@ -137,6 +140,8 @@ namespace gle
         bindings_applied_ = false;
         storage_->buffers.at(binding).changed = true;
         storage_->buffers.at(binding).buf.reset();
+        if (owner_->current() && owner_->current().get() == static_cast<i_vertex_array *>(this))
+            apply();
     }
 
 

@@ -7,5 +7,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/bind.hpp>
 
 #endif // STDAFX_H
