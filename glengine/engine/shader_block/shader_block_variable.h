@@ -30,8 +30,8 @@ struct shader_block_variable_t
     void set(glm::ivec3 xyz);
     void set(glm::ivec4 xyzw);
 
-    void set(glm::mat4 m);
-    void set(glm::mat3 m);
+    void set(glm::mat4);
+    void set(glm::mat3);
 
     GLenum type() const { return data_.type(); }
 

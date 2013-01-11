@@ -39,7 +39,8 @@ namespace gle
         char const * get_error_string(GLenum error) const;
 
         // viewport
-        void viewport(int x, int y, int width, int height);
+        viewport_t const& viewport() const { return viewport_; }
+        void set_viewport(viewport_t const& vp);
 
     private:
         query_object_manager_t query_manager_;
@@ -48,6 +49,8 @@ namespace gle
         vertex_array_manager_t vao_manager_;
         texture_manager_t texture_manager_;
         framebuffer_manager_t fbo_manager_;
+
+        viewport_t viewport_;
     };
 }
 

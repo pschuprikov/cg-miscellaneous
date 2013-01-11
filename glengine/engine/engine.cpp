@@ -29,11 +29,6 @@ void engine_t::dispatch_compute(int gx, int gy, int gz)
     glDispatchCompute(gx, gy, gz);
 }
 
-void engine_t::viewport(int x, int y, int width, int height)
-{
-    glViewport(x, y, width, height);
-}
-
 GLenum engine_t::get_error()
 {
     return glGetError();
@@ -50,6 +45,12 @@ char const * engine_t::get_error_string(GLenum error) const
     case GL_INVALID_FRAMEBUFFER_OPERATION: return "Invalid framebuffer operation";
     default : return "Unknown error";
     }
+}
+
+void engine_t::set_viewport(viewport_t const& vp)
+{
+    viewport_ = vp;
+    glViewport(vp.x(), vp.y(), vp.width(), vp.height());
 }
 
 

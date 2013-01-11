@@ -102,5 +102,6 @@ HEADERS += \
     engine/framebuffer/framebuffer.h \
     engine/framebuffer/framebuffer_attachment.h \
     utils/stl_utils.h \
-    engine/framebuffer_manager.h
+    engine/framebuffer_manager.h \
+    include/gleviewport.h
 

@@ -9,9 +9,22 @@ namespace gle
             buffer_ptr buf;
             int offset;
             int stride;
-            binding_data_t(buffer_ptr buf, int offset, int stride)
-                : buf(buf), offset(offset), stride(stride)
+
+            bool changed;
+
+            binding_data_t()
+                : buf(), offset(0), stride(0), changed(false)
             {}
+
+            void update(buffer_ptr buf, int offset, int stride)
+            {
+                this->buf = buf;
+                this->offset = offset;
+                this->stride = stride;
+                this->changed = true;
+            }
+
+            void validate() { changed = false; }
         };
 
         struct attrib_data_t
@@ -33,14 +46,15 @@ namespace gle
 
     vertex_array_t::vertex_array_t(GLuint id)
         : id_(id)
-        , applied_(true)
+        , attribs_applied_(true)
+        , bindings_applied_(true)
         , storage_(new storage_t())
     {}
 
     void vertex_array_t::add_vertex_attrib(shader_input_variable_ptr var, vertex_format_ptr fmt,
                                    vertex_attrib_binding_t binding)
     {
-        applied_ = false;
+        attribs_applied_ = false;
         storage_->attribs.insert(std::make_pair(var->location(), storage_t::attrib_data_t(var, fmt, binding)));
         glEnableVertexArrayAttribEXT(id_, var->location());
     }
@@ -50,9 +64,32 @@ namespace gle
         for (storage_t::binding_map_t::const_iterator b_it = storage_->buffers.begin();
              b_it != storage_->buffers.end(); ++b_it)
         {
-            glBindVertexBuffer(b_it->first, b_it->second.buf->gl_id(), b_it->second.offset,
-                               b_it->second.stride);
+            if (b_it->second.changed)
+            {
+                if (b_it->second.buf)
+                    glBindVertexBuffer(b_it->first, b_it->second.buf->gl_id(), b_it->second.offset,
+                                       b_it->second.stride);
+                else
+                    glBindVertexBuffer(b_it->first, 0, 0, 1);
+            }
         }
+    }
+
+    vertex_attrib_binding_t vertex_array_t::reserve_binding()
+    {
+        for (int free_binding = 0;;free_binding++)
+        {
+            if (storage_->buffers.find(free_binding) == storage_->buffers.end())
+            {
+                storage_->buffers.insert(std::make_pair(free_binding, storage_t::binding_data_t()));
+                return free_binding;
+            }
+        }
+    }
+
+    void vertex_array_t::free_binding(vertex_attrib_binding_t binding)
+    {
+        storage_->buffers.erase(binding);
     }
 
     void vertex_array_t::apply_formats()
@@ -75,23 +112,19 @@ namespace gle
 
     void vertex_array_t::remove_vertex_attrib(shader_input_variable_ptr var)
     {
-        applied_ = false;
+        attribs_applied_ = false;
         storage_->attribs.erase(var->location());
         glDisableVertexArrayAttribEXT(id_, var->location());
     }
 
-    vertex_attrib_binding_t vertex_array_t::bind_buffer(buffer_ptr buf, int offset, int stride)
-    {
-        applied_ = false;
-        for (int free_binding = 0;;free_binding++)
-        {
-            if (storage_->buffers.find(free_binding) == storage_->buffers.end())
-            {
-                storage_->buffers.insert(std::make_pair(free_binding,
-                                                        storage_t::binding_data_t(buf, offset, stride)));
-                return free_binding;
-            }
-        }
+    void vertex_array_t::bind_buffer(vertex_attrib_binding_t binding, buffer_ptr buf,
+                                                        int offset, int stride)
+    {        
+        bindings_applied_ = false;
+        storage_->buffers.at(binding).changed = true;
+        storage_->buffers.at(binding).buf = buf;
+        storage_->buffers.at(binding).offset = offset;
+        storage_->buffers.at(binding).stride = stride;
     }
 
     buffer_ptr vertex_array_t::binding(vertex_attrib_binding_t binding) const
@@ -101,8 +134,9 @@ namespace gle
 
     void vertex_array_t::unbind_buffer(vertex_attrib_binding_t binding)
     {
-        applied_ = false;
-        storage_->buffers.erase(binding);
+        bindings_applied_ = false;
+        storage_->buffers.at(binding).changed = true;
+        storage_->buffers.at(binding).buf.reset();
     }
 
 

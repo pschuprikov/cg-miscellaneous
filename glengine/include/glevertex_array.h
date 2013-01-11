@@ -19,7 +19,11 @@ struct i_vertex_array
                                    vertex_attrib_binding_t binding) = 0;
     virtual void remove_vertex_attrib(shader_input_variable_ptr var) = 0;
 
-    virtual vertex_attrib_binding_t bind_buffer(buffer_ptr buf, int offset, int stride) = 0;
+    virtual vertex_attrib_binding_t reserve_binding() = 0;
+    virtual void free_binding(vertex_attrib_binding_t binding) = 0;
+
+    virtual void bind_buffer(vertex_attrib_binding_t binding, buffer_ptr buf,
+                             int offset, int stride) = 0;
     virtual buffer_ptr binding(vertex_attrib_binding_t binding) const = 0;
     virtual void unbind_buffer(vertex_attrib_binding_t binding) = 0;
 

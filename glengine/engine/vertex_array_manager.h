@@ -17,7 +17,7 @@ public:
     vertex_array_ptr create_vertex_array();
     vertex_array_ptr current() const { return current_; }
     void set_current(vertex_array_ptr vao);
-    void reset_current() { current_.reset(); }
+    void reset_current();
 
     void draw_arrays(drawing_mode_t mode, int first, int count);
     void draw_elements(drawing_mode_t mode, int count, GLenum type, const void * indicies);

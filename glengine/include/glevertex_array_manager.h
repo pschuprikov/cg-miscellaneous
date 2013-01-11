@@ -9,6 +9,7 @@ namespace gle
 
 enum drawing_mode_t { DM_triangles = GL_TRIANGLES,
                       DM_lines = GL_LINES,
+                      DM_lines_strip = GL_LINE_STRIP,
                       DM_triangle_strip = GL_TRIANGLE_STRIP
                     };
 

@@ -14,10 +14,14 @@ struct vertex_array_t
 
     void apply()
     {
-        if (!applied_)
+        if (!bindings_applied_)
         {
-            applied_ = true;
+            bindings_applied_ = true;
             apply_bindings();
+        }
+        if (!attribs_applied_)
+        {
+            attribs_applied_ = true;
             apply_formats();
             apply_location_binding();
         }
@@ -31,7 +35,11 @@ public:
                                    vertex_attrib_binding_t binding);
     void remove_vertex_attrib(shader_input_variable_ptr var);
 
-    vertex_attrib_binding_t bind_buffer(buffer_ptr buf, int offset, int stride);
+    vertex_attrib_binding_t reserve_binding();
+    void free_binding(vertex_attrib_binding_t binding);
+
+    void bind_buffer(vertex_attrib_binding_t binding, buffer_ptr buf,
+                     int offset, int stride);
     buffer_ptr binding(vertex_attrib_binding_t binding) const;
     void unbind_buffer(vertex_attrib_binding_t binding);
 
@@ -45,7 +53,8 @@ private:
 
 private:
     GLuint id_;
-    bool applied_;
+    bool attribs_applied_;
+    bool bindings_applied_;
 
     boost::scoped_ptr<storage_t> storage_;
 };

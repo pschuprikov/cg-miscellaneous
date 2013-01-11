@@ -94,7 +94,7 @@ gle::program_ptr load_draw_texture_program()
     return program;
 }
 
-void handleKeyboard(unsigned char btn, int x, int y)
+void handleKeyboard(unsigned char, int, int)
 {
     exit(0);
 }
@@ -106,13 +106,10 @@ gle::texture_ptr load_texture()
         0.f, 1.f, 0.f,
         1.f, 1.f, 0.f
     };
-    assert(eng->get_error() == GL_NO_ERROR);
     gle::texture_ptr tex_color = eng->textures()->create_texture(gle::TT_1d);
-    assert(eng->get_error() == GL_NO_ERROR);
     tex_color->image_1d(0, GL_RGBA32F, 3, 0, GL_RGB, GL_FLOAT, tex_colors_data);
     tex_color->set_mag_filter(gle::TMAGF_nearest);
     tex_color->set_min_filter(gle::TMINF_nearest);
-    assert(eng->get_error() == GL_NO_ERROR);
     return tex_color;
 }
 
@@ -127,8 +124,6 @@ gle::framebuffer_ptr create_framebuffer(int width, int height)
 
     fb_color->image_2d(0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     fb_depth->image_2d(0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
-
-    assert(!eng->get_error());
 
     fb->color_attachment(0)->attach_texture(fb_color, 0);
     fb->depth_attachment()->attach_texture(fb_depth, 0);
@@ -169,7 +164,8 @@ void draw_fullscreen_tex(gle::texture_ptr tex)
         st = tex_draw_mat->input_var("in_st");
         tex_uniform = tex_draw_mat->var("tex_draw");
 
-        gle::vertex_attrib_binding_t vtx_data_binding = vao->bind_buffer(vtx_buf, 0, sizeof(float) * 4);
+        gle::vertex_attrib_binding_t vtx_data_binding = vao->reserve_binding();
+        vao->bind_buffer(vtx_data_binding, vtx_buf, 0, sizeof(float) * 4);
         gle::vertex_format_ptr pos_fmt(new gle::float_vertex_format_entry(2, GL_FLOAT, 0, false));
         gle::vertex_format_ptr st_fmt(new gle::float_vertex_format_entry(2, GL_FLOAT, sizeof(float) * 2, false));
         vao->add_vertex_attrib(pos, pos_fmt, vtx_data_binding);
@@ -220,6 +216,13 @@ void renderScene(void) {
         samples_passed->get(1)->set(std::max((int)spq->samples_passed(), 1));
     }
 
+    if (!unanswered)
+    {
+        prq->begin_query();
+        prg->begin_query();
+        spq->begin_query();
+    }
+
     colors_buf->buffer_data(gle::BU_static_draw, colors_cpu_buf.size(), &colors_cpu_buf[0]);
 
     static gle::i_indexed_buffer_target_t * colors_tgt = eng->buffers()->buffer_target(gle::BITT_shader_storage, 0);
@@ -245,7 +248,8 @@ void renderScene(void) {
     pos_buf->buffer_data(gle::BU_static_draw, sizeof(vpos), vpos);
     static gle::vertex_array_ptr vao = eng->vaos()->create_vertex_array();
     static gle::vertex_format_ptr fmt(new gle::float_vertex_format_entry(3, GL_FLOAT, 0, false));
-    static gle::vertex_attrib_binding_t pos_binding = vao->bind_buffer(pos_buf, 0, sizeof(float) * 3);
+    static gle::vertex_attrib_binding_t pos_binding = vao->reserve_binding();
+    vao->bind_buffer(pos_binding, pos_buf, 0, sizeof(float) * 3);
     vao->add_vertex_attrib(pos, fmt, pos_binding);
 
     static gle::framebuffer_ptr fbo = create_framebuffer(1000, 1000);
@@ -261,13 +265,6 @@ void renderScene(void) {
 
     glViewport(0, 0, 1000, 1000);
 
-    if (!unanswered)
-    {
-        prq->begin_query();
-        prg->begin_query();
-        spq->begin_query();
-    }
-
     eng->programs()->use(program);
 
     eng->clear_color(glm::vec4(1, 1, 0, 0));
@@ -280,19 +277,6 @@ void renderScene(void) {
 
     eng->vaos()->set_current(vao);
     eng->vaos()->draw_arrays(gle::DM_triangles, 0, 3);
-
-
-    if (!unanswered)
-    {
-        prq->end_query();
-        prg->end_query();
-        spq->end_query();
-        unanswered = true;
-    }
-
-    std::cerr << prq->time_elapsed_ns() * 1.e-6 << "ms; " << prg->primitives_generated()
-              << " gen primitives; " << spq->samples_passed() << " samples_passed" << std::endl;
-    unanswered = false;
 
 
     eng->fbos()->set_draw_framebuffer_default();
@@ -318,15 +302,26 @@ void renderScene(void) {
 
     draw_fullscreen_tex(fbo->color_attachment(0)->texture());
 
-    assert(eng->get_error() == GL_NO_ERROR);
-
     angle += 0.1f;
+
+
+    if (!unanswered)
+    {
+        prq->end_query();
+        prg->end_query();
+        spq->end_query();
+        unanswered = true;
+    }
+
+    std::cerr << prq->time_elapsed_ns() * 1.e-6 << "ms; " << prg->primitives_generated()
+              << " gen primitives; " << spq->samples_passed() << " samples_passed" << std::endl;
+    unanswered = false;
 
     glutSwapBuffers();
 }
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv)
+{
     // init GLUT and create window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);

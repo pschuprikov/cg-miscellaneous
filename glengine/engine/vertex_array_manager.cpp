@@ -30,9 +30,18 @@ vertex_array_manager_t::~vertex_array_manager_t()
 
 void vertex_array_manager_t::set_current(vertex_array_ptr vao)
 {
-    glBindVertexArray(vao->gl_id());
-    storage_->vaos.at(vao->gl_id()).lock()->apply();
+    if (vao)
+    {
+        glBindVertexArray(vao->gl_id());
+        storage_->vaos.at(vao->gl_id()).lock()->apply();
+    }
     current_ = vao;
+}
+
+void vertex_array_manager_t::reset_current()
+{
+    glBindVertexArray(0);
+    current_.reset();
 }
 
 void vertex_array_manager_t::delete_vertex_array(i_vertex_array * array)

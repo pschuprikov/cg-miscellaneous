@@ -58,10 +58,10 @@ void shader_block_variable_t::set(glm::ivec4 xyzw)
     std::copy(glm::value_ptr(xyzw), glm::value_ptr(xyzw) + 4, int_ptr());
 }
 
-void shader_block_variable_t::set(glm::mat4 m)
+void shader_block_variable_t::set(glm::mat4)
 {}
 
-void shader_block_variable_t::set(glm::mat3 m)
+void shader_block_variable_t::set(glm::mat3)
 {}
 
 }

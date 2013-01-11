@@ -10,6 +10,8 @@
 #include <gletexture_manager.h>
 #include <gleframebuffer_manager.h>
 
+#include <gleviewport.h>
+
 namespace gle
 {
 
@@ -43,12 +45,12 @@ namespace gle
 
     struct i_engine
     {
-        virtual i_query_object_manager * queries() = 0;
+        virtual i_query_object_manager *  queries() = 0;
         virtual i_buffer_object_manager * buffers() = 0;
-        virtual i_program_manager * programs() = 0;
-        virtual i_vertex_array_manager * vaos() = 0;
-        virtual i_texture_manager * textures() = 0;
-        virtual i_framebuffer_manager * fbos() = 0;
+        virtual i_program_manager *      programs() = 0;
+        virtual i_vertex_array_manager *     vaos() = 0;
+        virtual i_texture_manager *      textures() = 0;
+        virtual i_framebuffer_manager *      fbos() = 0;
 
         // memory access synchronization
         virtual void memory_barrier(memory_barrier_bit_t barriers) = 0;
@@ -65,7 +67,8 @@ namespace gle
         virtual char const * get_error_string(GLenum error) const = 0;
 
         // viewport
-        virtual void viewport(int x, int y, int width, int height) = 0;
+        virtual viewport_t const& viewport() const = 0;
+        virtual void set_viewport(viewport_t const& vp) = 0;
 
         virtual ~i_engine() {}
     };

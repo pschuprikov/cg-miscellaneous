@@ -1,0 +1,16 @@
+#ifndef SEGMENT_BUILDER_H
+#define SEGMENT_BUILDER_H
+
+#include "../logics.h"
+
+namespace tvd
+{
+
+struct segment_builder_t
+{
+
+};
+
+}
+
+#endif // SEGMENT_BUILDER_H
