@@ -39,36 +39,63 @@ buffer_texture_ptr texture_manager_t::create_buffer_texture()
                               boost::bind(&delete_texture, _1));
 }
 
-texture_binding_t texture_manager_t::bind_texture(generic_texture_ptr tex)
+void texture_manager_t::bind_texture(texture_binding_t binding, generic_texture_ptr tex)
 {
-    texture_binding_t binding = free_texture_unit();
-    storage_->tex_units.insert(std::make_pair(binding, tex));
+    storage_->tex_units.at(binding) = tex;
     glActiveTexture(gl_texture_binding(binding));
     glBindTexture(tex->target(), tex->gl_id());
+}
+
+void texture_manager_t::bind_image(image_binding_t binding, texture_ptr tex, int level, image_texture_access_t access,
+                                              GLenum format)
+{
+    storage_->image_units.at(binding) = tex;
+    glBindImageTexture(binding, tex->gl_id(), level, false, 0, access, format);
+}
+
+
+texture_binding_t texture_manager_t::reserve_texture_binding()
+{
+    texture_binding_t binding = free_texture_unit();
+    storage_->tex_units.insert(std::make_pair(binding, gle::texture_ptr()));
 
     return binding;
 }
 
-image_binding_t texture_manager_t::bind_image(texture_ptr tex, int level, image_texture_access_t access,
-                                              GLenum format)
+void texture_manager_t::release_texture_binding(texture_binding_t binding)
+{
+    unbind_texture(binding);
+    storage_->tex_units.erase(binding);
+}
+
+image_binding_t texture_manager_t::reserve_image_binding()
 {
     image_binding_t binding = free_image_unit();
-    storage_->image_units.insert(std::make_pair(binding, tex));
-    glBindImageTexture(binding, tex->gl_id(), level, false, 0, access, format);
+    storage_->image_units.insert(std::make_pair(binding, gle::texture_ptr()));
 
     return binding;
+}
+
+void texture_manager_t::release_image_binding(image_binding_t binding)
+{
+    unbind_image(binding);
+    storage_->image_units.erase(binding);
 }
 
 void texture_manager_t::unbind_texture(texture_binding_t binding)
 {
-    glActiveTexture(gl_texture_binding(binding));
-    glBindTexture(storage_->tex_units.at(binding)->target(), 0);
+    if (storage_->tex_units.at(binding))
+    {
+        glActiveTexture(gl_texture_binding(binding));
+        glBindTexture(storage_->tex_units.at(binding)->target(), 0);
+    }
     storage_->tex_units.erase(binding);
 }
 
 void texture_manager_t::unbind_image(image_binding_t binding)
 {
-    glBindImageTexture(binding, 0, 0, false, 0, ITA_read_only, GL_R8UI);
+    if (storage_->image_units.at(binding)) // actually useless
+        glBindImageTexture(binding, 0, 0, false, 0, ITA_read_only, GL_R8UI);
     storage_->image_units.erase(binding);
 }
 

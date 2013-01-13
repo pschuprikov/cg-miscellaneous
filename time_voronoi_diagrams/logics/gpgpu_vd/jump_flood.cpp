@@ -8,10 +8,10 @@ struct jump_flood_t::impl_t
     gle::program_ptr prg;
 
     gle::shader_variable_ptr max_distance;
-    gle::shader_variable_ptr outer_velocity;
+    gle::shader_variable_ptr outer_params;
     gle::shader_variable_ptr jump_step;
 
-    gle::shader_variable_ptr img_vd;
+    gle::shader_variable_ptr img_vd_in;
 
     impl_t()
     {
@@ -22,10 +22,10 @@ private:
     void find_uniforms()
     {
         max_distance = prg->var("max_distance");
-        outer_velocity = prg->var("outer_velocity");
+        outer_params = prg->var("outer_params");
         jump_step = prg->var("jump_step");
 
-        img_vd = prg->var("img_vd");
+        img_vd_in = prg->var("img_vd_in");
     }
 
     void load_program()
@@ -56,12 +56,18 @@ jump_flood_t::~jump_flood_t() {}
 
 void jump_flood_t::process(gle::texture_ptr tex)
 {
-    gle::image_binding_t binding = gle::default_engine()->textures()->bind_image(
-        tex, 0, gle::ITA_read_write, GL_RGBA32UI);
-    impl_->img_vd->set(binding);
+    gle::texture_ptr tex_in = tex;
+
+    gle::image_binding_t bin = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(bin, tex_in, 0, gle::ITA_read_write, GL_RGBA32UI);
+    impl_->img_vd_in->set(bin);
 
     impl_->max_distance->set(max_distance_);
-    impl_->outer_velocity->set(outer_velocity_);
+
+    double const sin_alpha = outer_velocity_;
+    double const cos_alpha = sqrt(1 - sin_alpha * sin_alpha);
+
+    impl_->outer_params->set(glm::vec3(sin_alpha, 1 / sin_alpha, cos_alpha));
 
     gle::default_engine()->programs()->use(impl_->prg);
 
@@ -70,18 +76,20 @@ void jump_flood_t::process(gle::texture_ptr tex)
     for (step = 1; step < max_dim; step <<= 1)
         ;
 
-    int const group_size = 8;
-    for (;step > 0; step >>= 1)
+    int const group_size = 16;
+    for (; step > 0; step >>= 1)
     {
         impl_->jump_step->set(step);
 
-        gle::default_engine()->memory_barrier(gle::MBB_shader_image_access);
+       // gle::default_engine()->memory_barrier(gle::MBB_shader_image_access);
         gle::default_engine()->dispatch_compute((tex->width() + group_size - 1) / group_size,
             (tex->height() + group_size - 1) / group_size, 1);
     }
 
+
     gle::default_engine()->programs()->reset_program_in_use();
-    gle::default_engine()->textures()->unbind_image(binding);
+
+    gle::default_engine()->textures()->release_image_binding(bin);
 }
 
 }

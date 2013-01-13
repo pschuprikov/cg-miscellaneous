@@ -64,4 +64,7 @@ void shader_block_variable_t::set(glm::mat4)
 void shader_block_variable_t::set(glm::mat3)
 {}
 
+void shader_block_variable_t::set(glm::mat2)
+{}
+
 }

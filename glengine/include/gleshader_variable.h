@@ -20,6 +20,7 @@ struct i_shader_variable
 
     virtual void set(glm::mat4 m) = 0;
     virtual void set(glm::mat3 m) = 0;
+    virtual void set(glm::mat2 m) = 0;
 
     virtual GLenum type() const = 0;
 };

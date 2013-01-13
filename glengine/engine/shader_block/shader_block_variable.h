@@ -32,6 +32,7 @@ struct shader_block_variable_t
 
     void set(glm::mat4);
     void set(glm::mat3);
+    void set(glm::mat2);
 
     GLenum type() const { return data_.type(); }
 

@@ -57,4 +57,10 @@ void default_uniform_t::set(glm::mat3 m)
                               1, false, glm::value_ptr(m));
 }
 
+void default_uniform_t::set(glm::mat2 m)
+{
+    glProgramUniformMatrix2fv(pid_, data_.location(),
+                              1, false, glm::value_ptr(m));
+}
+
 }

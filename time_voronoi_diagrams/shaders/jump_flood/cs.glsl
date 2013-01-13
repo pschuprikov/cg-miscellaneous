@@ -1,18 +1,33 @@
 #version 430
 
-layout(local_size_x = 8, local_size_y = 8) in;
+layout(local_size_x = 16, local_size_y = 16) in;
 
-uniform float outer_velocity;
+uniform vec3 outer_params; // sin_alpha (outer_velocity)
+                            // 1 / outer_velocity
+                            // cos_alpha
+
+const float sin_alpha = outer_params.x;
+const float cos_alpha = outer_params.z;
+const float ov_rec = outer_params.y;
+
+const mat2 rot0 = mat2(sin_alpha, -cos_alpha,
+                       cos_alpha, sin_alpha);
+
+const mat2 rot1 = mat2(cos_alpha, -sin_alpha,
+                       sin_alpha,  cos_alpha);
+
 uniform float max_distance;
+
+uniform mat2 velocity_rotation;
 
 uniform int jump_step;
 
-uniform layout(rgba32ui) uimage2D img_vd;
+uniform layout(rgba32ui) uimage2D img_vd_in;
+uniform layout(rgba32ui) writeonly uimage2D img_vd_out;
 
 void unpack_params(in uvec4 texel, out vec4 segment, out float prefix_dist)
 {
     prefix_dist = unpackHalf2x16(texel.w)[1];
-
     segment.xy = unpackUnorm2x16(texel.x);
     segment.zw = unpackUnorm2x16(texel.y);
 }
@@ -25,21 +40,14 @@ float cross_2d(in vec2 v1, in vec2 v2)
 vec2 calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
 {
    float cur_dist = max_distance * 2;
-   float out_dist;
 
    vec2 dir = normalize(seg.zw - seg.xy);
 
    vec2 r1 = pos - seg.xy;
    vec2 r2 = pos - seg.zw;
 
-   float sin_alpha = outer_velocity;
-   float cos_alpha = sqrt(1 - sin_alpha * sin_alpha);
-
-   mat2 rot = mat2(sin_alpha, -cos_alpha,
-                   cos_alpha,  sin_alpha);
-
-   vec2 dir1 = rot * dir;
-   vec2 dir2 = transpose(rot) * dir;
+   vec2 dir1 = rot0 * dir;
+   vec2 dir2 = transpose(rot0) * dir;
 
    float c1 = cross_2d(dir, r1);
 
@@ -47,47 +55,41 @@ vec2 calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
 
    if (dot(dir, r1) >= 0 && (cross_2d(dir1, r2) <= 0 || cross_2d(dir2, r2) >= 0))
    {
-      rot = mat2(cos_alpha, -sin_alpha,
-                 sin_alpha,  cos_alpha);
-
-      dir1 = rot * dir;
-      dir2 = transpose(rot) * dir;
+      dir1 = rot1 * dir;
+      dir2 = transpose(rot1) * dir;
 
       proj = dot(dir1, r1) * dir1;
-      if (cross_2d(dir, proj) * c1 <= 0 && length(r1 - proj) / outer_velocity < cur_dist)
+      if (cross_2d(dir, proj) * c1 <= 0 && length(r1 - proj) * ov_rec < cur_dist)
       {
-         cur_dist = length(r1 - proj) / outer_velocity;
-         out_dist = length(r1 - proj) - length(proj) * sin_alpha / cos_alpha;
+         cur_dist = length(r1 - proj) * ov_rec;;
       }
 
       proj = dot(dir2, r1) * dir2;
-      if (cross_2d(dir, proj) * c1 <= 0 && length(r1 - proj) / outer_velocity < cur_dist)
+      if (cross_2d(dir, proj) * c1 <= 0 && length(r1 - proj) * ov_rec < cur_dist)
       {
-        cur_dist = length(r1 - proj) / outer_velocity;
-        out_dist = length(r1 - proj) - length(proj) * sin_alpha / cos_alpha;
+        cur_dist = length(r1 - proj) * ov_rec;
       }
    }
 
-   if (distance(pos, seg.xy) / outer_velocity < cur_dist)
+   if (distance(pos, seg.xy) * ov_rec < cur_dist)
    {
-      cur_dist = distance(pos, seg.xy) / outer_velocity;
-      out_dist = distance(pos, seg.xy);
+      cur_dist = distance(pos, seg.xy) * ov_rec;
    }
-   if (distance(pos, seg.zw) / outer_velocity + distance(seg.xy, seg.zw) < cur_dist)
+
+   if (distance(pos, seg.zw) * ov_rec + distance(seg.xy, seg.zw) < cur_dist)
    {
-      cur_dist = distance(pos, seg.zw) / outer_velocity + distance(seg.xy, seg.zw);
-      out_dist = distance(pos, seg.zw);
+      cur_dist = distance(pos, seg.zw) * ov_rec + distance(seg.xy, seg.zw);
    }
-   return vec2(cur_dist + prefix_dist, out_dist / outer_velocity);
+   return vec2(cur_dist + prefix_dist);
 }
+
+const ivec2 max_idx = imageSize(img_vd_in) - 1;
+const ivec2 my_coord = ivec2(min(gl_GlobalInvocationID.xy, max_idx));
+const vec2 pos = my_coord / vec2(imageSize(img_vd_in));
 
 void main(void)
 {
     float min_dist = max_distance * 2;
-
-    const ivec2 max_idx = imageSize(img_vd) - 1;
-    const ivec2 my_coord = ivec2(min(gl_GlobalInvocationID.xy, max_idx));
-    const vec2 pos = my_coord / vec2(imageSize(img_vd));
 
     uvec4 best;
 
@@ -95,9 +97,14 @@ void main(void)
     {
        for (int j = -1; j <= 1; j++)
        {
-          uvec4 cur = imageLoad(img_vd, min(max_idx, my_coord + ivec2(i, j) * jump_step));
+          ivec2 coord = my_coord + ivec2(i, j) * jump_step;
 
-          if (cur == uvec4(0, 0, 0, 0))
+          if ((lessThan(coord, ivec2(0)) || greaterThan(coord, max_idx)) != bvec2(0))
+              continue;
+
+          uvec4 cur = imageLoad(img_vd_in, coord);
+
+          if (cur != uvec4(0))
               continue;
 
           vec4 seg;
@@ -106,7 +113,7 @@ void main(void)
 
           float cur_dist = calc_optimal(seg, prefix_dist, pos).x;
 
-          if (cur_dist < min_dist && cur_dist < max_distance)
+          if (cur_dist < min_dist && cur_dist < max_distance && cur != uvec4(0))
           {
              min_dist = cur_dist;
              best = cur;
@@ -115,6 +122,6 @@ void main(void)
     }
 
     if (min_dist != max_distance * 2) {
-        imageStore(img_vd, my_coord, best);
+        imageStore(img_vd_in, my_coord, best);
     }
 }

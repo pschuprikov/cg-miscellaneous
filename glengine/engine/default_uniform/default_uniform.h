@@ -29,6 +29,7 @@ struct default_uniform_t
 
     void set(glm::mat4 m);
     void set(glm::mat3 m);
+    void set(glm::mat2 m);
 
     GLenum type() const { return data_.type(); }
 

@@ -79,13 +79,14 @@ void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex)
     gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->programs()->use(impl_->prg);
 
-    gle::image_binding_t img_binding =
-            gle::default_engine()->textures()->bind_image(tex, 0, gle::ITA_read_only, GL_RGBA32UI);
+    gle::image_binding_t img_binding = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(img_binding, tex, 0, gle::ITA_read_only, GL_RGBA32UI);
+
     impl_->img_vd->set(img_binding);
 
     gle::default_engine()->draw_arrays(gle::DM_triangle_strip, 0, impl_->count);
 
-    gle::default_engine()->textures()->unbind_image(img_binding);
+    gle::default_engine()->textures()->release_image_binding(img_binding);
 
     gle::default_engine()->vaos()->reset_current();
     gle::default_engine()->programs()->reset_program_in_use();

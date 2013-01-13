@@ -17,9 +17,14 @@ struct texture_manager_t
     texture_ptr create_texture(texture_target_t target);
     buffer_texture_ptr create_buffer_texture();
 
-    texture_binding_t bind_texture(generic_texture_ptr tex);
+    texture_binding_t reserve_texture_binding();
+    void release_texture_binding(texture_binding_t binding);
+    image_binding_t reserve_image_binding();
+    void release_image_binding(texture_binding_t binding);
 
-    image_binding_t bind_image(texture_ptr tex, int level, image_texture_access_t access, GLenum internal_format);
+    void bind_texture(texture_binding_t binding, generic_texture_ptr tex);
+    void bind_image(image_binding_t binding, texture_ptr tex,
+                    int level, image_texture_access_t access, GLenum internal_format);
 
     void unbind_texture(texture_binding_t binding);
     void unbind_image(image_binding_t binding);

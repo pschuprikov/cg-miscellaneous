@@ -21,9 +21,14 @@ struct i_texture_manager
     virtual texture_ptr create_texture(texture_target_t target) = 0;
     virtual buffer_texture_ptr create_buffer_texture() = 0;
 
-    virtual texture_binding_t bind_texture(generic_texture_ptr tex) = 0;
+    virtual texture_binding_t reserve_texture_binding() = 0;
+    virtual void release_texture_binding(texture_binding_t binding) = 0;
+    virtual image_binding_t reserve_image_binding() = 0;
+    virtual void release_image_binding(texture_binding_t binding) = 0;
 
-    virtual image_binding_t bind_image(texture_ptr tex, int level, image_texture_access_t access, GLenum internal_format) = 0;
+    virtual void bind_texture(texture_binding_t binding, generic_texture_ptr tex) = 0;
+    virtual void bind_image(image_binding_t binding, texture_ptr tex,
+                            int level, image_texture_access_t access, GLenum internal_format) = 0;
 
     virtual void unbind_texture(texture_binding_t binding) = 0;
     virtual void unbind_image(image_binding_t binding) = 0;
