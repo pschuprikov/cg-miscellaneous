@@ -28,6 +28,11 @@ namespace gle
         glNamedBufferSubDataEXT(id_, offset, size, data);
     }
 
+    void buffer_t::get_buffer_sub_data( size_t offset, size_t size, void * data) const
+    {
+        glGetNamedBufferSubDataEXT(id_, offset, size, data);
+    }
+
     void buffer_t::buffer_data( buffer_usage_t usage, size_t size, const void * data )
     {
         size_ = size;

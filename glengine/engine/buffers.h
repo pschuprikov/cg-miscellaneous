@@ -53,6 +53,8 @@ public:
     void buffer_sub_data( size_t offset, size_t size, const void * data );
     void buffer_data( buffer_usage_t usage,  size_t size, const void * data );
 
+    void get_buffer_sub_data( size_t offset, size_t size, void * data) const;
+
     buffer_usage_t current_usage( ) const;
 
     void map_buffer_range( size_t offset, size_t length, GLbitfield access );

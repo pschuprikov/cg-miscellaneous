@@ -39,6 +39,8 @@ struct i_buffer
     virtual void buffer_sub_data( size_t offset, size_t size, const void * data ) = 0;
     virtual void     buffer_data( buffer_usage_t usage, size_t size, const void * data ) = 0;
 
+    virtual void get_buffer_sub_data( size_t offset, size_t size, void * data) const = 0;
+
     virtual buffer_usage_t current_usage( ) const = 0;
 
     virtual void map_buffer_range(size_t offset, size_t length, GLbitfield access) = 0;

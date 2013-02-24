@@ -39,7 +39,7 @@ SOURCES += \
     engine/framebuffer/framebuffer.cpp \
     engine/framebuffer_manager.cpp
 
-LIBS += -lGLEW
+LIBS += -lGLEW -lboost_filesystem
 
 INCLUDEPATH += include
 
