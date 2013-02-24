@@ -28,13 +28,13 @@ private:
         try
         {
             gle::shader_ptr fs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/rasterizer/fs.glsl",
+                "shaders/rasterizer_fs.glsl",
                 gle::ST_fragment);
             gle::shader_ptr gs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/rasterizer/gs.glsl",
+                "shaders/rasterizer_gs.glsl",
                 gle::ST_geometry);
             gle::shader_ptr vs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/rasterizer/vs.glsl",
+                "shaders/rasterizer_vs.glsl",
                 gle::ST_vertex);
             prg->attach_shader(fs);
             prg->attach_shader(gs);
@@ -52,8 +52,8 @@ private:
         vao = gle::default_engine()->vaos()->create_vertex_array();
         vtx_binding = vao->reserve_binding();
 
-        gle::vertex_format_ptr pos_fmt(new gle::float_vertex_format_entry(2, GL_FLOAT, 0, false));
-        gle::vertex_format_ptr dist_fmt(new gle::float_vertex_format_entry(1, GL_FLOAT, sizeof(float) * 2, false));
+        static gle::vertex_format_t const pos_fmt(gle::float_vertex_format(2, GL_FLOAT, 0, false));
+        static gle::vertex_format_t const dist_fmt(gle::float_vertex_format(1, GL_FLOAT, sizeof(float) * 2, false));
 
         vao->add_vertex_attrib(prg->input_var("in_pos"), pos_fmt, vtx_binding);
         vao->add_vertex_attrib(prg->input_var("in_dist"), dist_fmt, vtx_binding);

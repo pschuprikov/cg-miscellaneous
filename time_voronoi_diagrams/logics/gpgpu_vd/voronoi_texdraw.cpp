@@ -27,10 +27,10 @@ private:
         try
         {
             gle::shader_ptr fs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/texdraw/fs.glsl",
+                "shaders/texdraw_fs.glsl",
                 gle::ST_fragment);
             gle::shader_ptr vs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/texdraw/vs.glsl",
+                "shaders/texdraw_vs.glsl",
                 gle::ST_vertex);
             prg->attach_shader(fs);
             prg->attach_shader(vs);
@@ -60,7 +60,7 @@ private:
 
         gle::vertex_attrib_binding_t binding = vao->reserve_binding();
         vao->bind_buffer(binding, tex01buf, 0, sizeof(float) * 2);
-        gle::vertex_format_ptr fmt(new gle::float_vertex_format_entry(2, GL_FLOAT, 0, false));
+        static gle::vertex_format_t const fmt(gle::float_vertex_format(2, GL_FLOAT, 0, false));
         vao->add_vertex_attrib(prg->input_var("in_pos"), fmt, binding);
 
         count = 4;

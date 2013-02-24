@@ -5,6 +5,8 @@ CONFIG += console debug
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x
+
 SOURCES += main.cpp \
     core/input_manager.cpp \
     core/input_infos.cpp \
@@ -19,12 +21,13 @@ SOURCES += main.cpp \
     logics/gpgpu_vd/lines_prepare.cpp \
     logics/gpgpu_vd/rasterizer.cpp \
     logics/gpgpu_vd/voronoi_texdraw.cpp \
-    logics/gpgpu_vd/jump_flood.cpp
+    logics/gpgpu_vd/jump_flood.cpp \
+    logics/lines_loader.cpp
 
 PRECOMPILED_HEADER = stdafx.h
 
 LIBS += -L/home/pasha/qtprojects/glengine/debug
-LIBS += -lGL -lglut -lGLU -lglengine
+LIBS += -lglut -lGLU -lglengine
 
 INCLUDEPATH += /home/pasha/repos/cg-miscellaneous/glengine/include
 
@@ -49,14 +52,28 @@ HEADERS += \
     logics/gpgpu_vd/lines_prepare.h \
     logics/gpgpu_vd/rasterizer.h \
     logics/gpgpu_vd/voronoi_texdraw.h \
-    logics/gpgpu_vd/jump_flood.h
+    logics/gpgpu_vd/jump_flood.h \
+    logics/lines_loader.h \
+    lines_common.h
 
-OTHER_FILES += \
-    shaders/line/vs.glsl \
-    shaders/line/fs.glsl \
-    shaders/rasterizer/vs.glsl \
-    shaders/rasterizer/fs.glsl \
-    shaders/rasterizer/gs.glsl \
-    shaders/texdraw/vs.glsl \
-    shaders/texdraw/fs.glsl \
-    shaders/jump_flood/cs.glsl
+LINES_DATA_FILE = lines.dat
+
+SHADER_FILES = \
+    shaders/jump_flood/jump_flood_cs.glsl \
+    shaders/line/line_fs.glsl \
+    shaders/line/line_vs.glsl \
+    shaders/rasterizer/rasterizer_fs.glsl \
+    shaders/rasterizer/rasterizer_gs.glsl \
+    shaders/rasterizer/rasterizer_vs.glsl \
+    shaders/texdraw/texdraw_fs.glsl \
+    shaders/texdraw/texdraw_vs.glsl
+
+OTHER_FILES += $$SHADER_FILES $$LINES_DATA_FILE
+
+shaders.path=$$OUT_PWD/shaders/
+shaders.files += $$SHADER_FILES
+
+lines_data.path = $$OUT_PWD/
+lines_data.files += $$LINES_DATA_FILE
+
+INSTALLS += shaders lines_data

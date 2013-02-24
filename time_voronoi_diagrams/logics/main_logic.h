@@ -6,6 +6,7 @@
 #include "../logics.h"
 
 #include "lines_builder.h"
+#include "lines_loader.h"
 #include "voronoi_diagram.h"
 
 namespace tvd
@@ -31,6 +32,7 @@ private:
     i_logic_processor * proc_;
 
     lines_builder_ptr lines_builder_;
+    lines_loader_ptr lines_loader_;
     voronoi_diagram_ptr voronoi_;
 };
 

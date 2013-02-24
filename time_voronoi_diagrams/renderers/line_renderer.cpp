@@ -8,10 +8,10 @@ line_renderer_t::line_renderer_t()
 {
     prg_ = gle::default_engine()->programs()->create_program("line renderer");
     gle::shader_ptr fs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/line/fs.glsl",
+                "shaders/line_fs.glsl",
                 gle::ST_fragment);
     gle::shader_ptr vs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/line/vs.glsl",
+                "shaders/line_vs.glsl",
                 gle::ST_vertex);
     prg_->attach_shader(fs);
     prg_->attach_shader(vs);
@@ -23,7 +23,7 @@ line_renderer_t::line_renderer_t()
     vao_ = gle::default_engine()->vaos()->create_vertex_array();
     pos_binding_ = vao_->reserve_binding();
 
-    gle::vertex_format_ptr fmt(new gle::float_vertex_format_entry(2, GL_FLOAT, 0, false));
+    static gle::vertex_format_t fmt(gle::float_vertex_format(2, GL_FLOAT, 0, false));
 
     vao_->add_vertex_attrib(prg_->input_var("in_pos"), fmt, pos_binding_);
 }

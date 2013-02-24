@@ -34,7 +34,7 @@ private:
         try
         {
             gle::shader_ptr cs = gle::default_engine()->programs()->load_shader(
-                "/home/pasha/repos/cg-miscellaneous/time_voronoi_diagrams/shaders/jump_flood/cs.glsl",
+                "shaders/jump_flood_cs.glsl",
                 gle::ST_compute);
             prg->attach_shader(cs);
             prg->link();
@@ -60,8 +60,8 @@ void jump_flood_t::process(gle::texture_ptr tex)
 
     gle::image_binding_t bin = gle::default_engine()->textures()->reserve_image_binding();
     gle::default_engine()->textures()->bind_image(bin, tex_in, 0, gle::ITA_read_write, GL_RGBA32UI);
-    impl_->img_vd_in->set(bin);
 
+    impl_->img_vd_in->set(bin);
     impl_->max_distance->set(max_distance_);
 
     double const sin_alpha = outer_velocity_;
@@ -72,8 +72,9 @@ void jump_flood_t::process(gle::texture_ptr tex)
     gle::default_engine()->programs()->use(impl_->prg);
 
     int const max_dim = std::max(tex->width(), tex->height());
+
     int step;
-    for (step = 1; step < max_dim; step <<= 1)
+    for (step = 1; step << 1 < max_dim; step <<= 1)
         ;
 
     int const group_size = 16;
@@ -81,14 +82,12 @@ void jump_flood_t::process(gle::texture_ptr tex)
     {
         impl_->jump_step->set(step);
 
-       // gle::default_engine()->memory_barrier(gle::MBB_shader_image_access);
         gle::default_engine()->dispatch_compute((tex->width() + group_size - 1) / group_size,
             (tex->height() + group_size - 1) / group_size, 1);
     }
-
+    gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
 
     gle::default_engine()->programs()->reset_program_in_use();
-
     gle::default_engine()->textures()->release_image_binding(bin);
 }
 

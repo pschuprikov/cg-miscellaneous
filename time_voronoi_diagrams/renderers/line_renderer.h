@@ -3,33 +3,10 @@
 
 #include "stdafx.h"
 
+#include "lines_common.h"
+
 namespace tvd
 {
-
-#pragma pack(push, 1)
-struct line_vertex_t
-{
-    float x;
-    float y;
-};
-#pragma pack(pop)
-
-struct line_data_t
-{
-    line_data_t(glm::vec3 color)
-        : color_(color)
-        , vertrices_(gle::default_engine()->buffers()->create_buffer())
-    {}
-
-    glm::vec3 color() const { return color_; }
-    gle::buffer_ptr vtx_data() const { return vertrices_; }
-
-    int count() const { return vertrices_->size() / sizeof(line_vertex_t); }
-
-private:
-    glm::vec3 color_;
-    gle::buffer_ptr vertrices_;
-};
 
 struct line_renderer_t
 {

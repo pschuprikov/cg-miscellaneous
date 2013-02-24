@@ -32,12 +32,12 @@ void unpack_params(in uvec4 texel, out vec4 segment, out float prefix_dist)
     segment.zw = unpackUnorm2x16(texel.y);
 }
 
-float cross_2d(in vec2 v1, in vec2 v2)
+float cross_2d(inout vec2 v1, inout vec2 v2)
 {
     return fma(v1.x, v2.y, -v1.y * v2.x);
 }
 
-float calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
+float calc_optimal(inout vec4 seg, inout float prefix_dist, in vec2 pos)
 {
    float cur_dist = max_distance * 2;
 
@@ -108,10 +108,7 @@ void main(void)
        {
           ivec2 coord = my_coord + ivec2(i, j) * jump_step;
 
-          if ((lessThan(coord, ivec2(0)) || greaterThan(coord, max_idx)) != false)
-              continue;
-
-          uvec4 cur = imageLoad(img_vd_in, coord);
+          uvec4 cur = imageLoad(img_vd_in, clamp(coord, ivec2(0), max_idx));
 
           vec4 seg;
           float prefix_dist;

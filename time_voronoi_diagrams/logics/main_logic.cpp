@@ -10,6 +10,7 @@ void main_logic_t::treat(i_io_provider * io)
     {
         lines_builder_.reset(new lines_builder_t(this));
         voronoi_.reset(new voronoi_diagram_t(this));
+        lines_loader_.reset(new lines_loader_t(this));
     }
 }
 
@@ -20,6 +21,11 @@ void main_logic_t::key_pressed(const i_keyboard_input_info *ev)
         lines_builder_->reset();
         proc_->set_next_logic(lines_builder_);
     }
+    else if (ev->key_pressed() == 'o')
+    {
+        proc_->set_next_logic(lines_loader_);
+    }
+
 }
 
 }

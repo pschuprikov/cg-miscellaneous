@@ -11,7 +11,6 @@
 namespace tvd
 {
 
-typedef std::vector<line_data_t> lines_data_t;
 
 struct lines_builder_t
     : i_logic
