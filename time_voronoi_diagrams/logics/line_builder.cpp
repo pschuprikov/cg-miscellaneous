@@ -71,7 +71,6 @@ void line_builder_t::mouse_move(const i_input_info * ev)
 
 void line_builder_t::render()
 {
-    gle::default_engine()->clear_color(glm::vec4(1, 1, 0, 1));
     renderer_->render_line(*line_data_);
 }
 

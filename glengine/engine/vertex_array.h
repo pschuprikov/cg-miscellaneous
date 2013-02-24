@@ -17,14 +17,24 @@ struct vertex_array_t
     {
         if (!bindings_applied_)
         {
-            bindings_applied_ = true;
             apply_bindings();
+            bindings_applied_ = true;
         }
         if (!attribs_applied_)
         {
-            attribs_applied_ = true;
             apply_formats();
             apply_location_binding();
+            attribs_applied_ = true;
+        }
+        if (!element_binding_applied_)
+        {
+            apply_element_binding();
+            element_binding_applied_ = true;
+        }
+        if (!primitive_restart_index_applied_)
+        {
+            apply_primitive_restart_index();
+            primitive_restart_index_applied_ = true;
         }
     }
 
@@ -32,8 +42,8 @@ struct vertex_array_t
 public:
     GLuint gl_id() const { return id_; }
 
-    void add_vertex_attrib(shader_input_variable_ptr var, vertex_format_ptr format,
-                                   vertex_attrib_binding_t binding);
+    void add_vertex_attrib(shader_input_variable_ptr var,
+        vertex_format_t format, vertex_attrib_binding_t binding);
     void remove_vertex_attrib(shader_input_variable_ptr var);
 
     vertex_attrib_binding_t reserve_binding();
@@ -44,10 +54,18 @@ public:
     buffer_ptr binding(vertex_attrib_binding_t binding) const;
     void unbind_buffer(vertex_attrib_binding_t binding);
 
+    void bind_element_buffer(buffer_ptr buf);
+    buffer_ptr element_binding() const;
+
+    void set_primitive_restart_index(boost::optional<size_t> idx);
+    boost::optional<size_t> primitive_restart_index() const;
+
 private:
     void apply_bindings();
+    void apply_element_binding();
     void apply_formats();
     void apply_location_binding();
+    void apply_primitive_restart_index();
 
 private:
     struct storage_t;
@@ -56,6 +74,8 @@ private:
     GLuint id_;
     bool attribs_applied_;
     bool bindings_applied_;
+    bool element_binding_applied_;
+    bool primitive_restart_index_applied_;
 
     boost::scoped_ptr<storage_t> storage_;
 

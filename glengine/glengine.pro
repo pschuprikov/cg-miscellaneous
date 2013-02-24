@@ -2,7 +2,7 @@ QT -= core gui
 
 CONFIG += debug
 
-QMAKE_CXXFLAGS = -Wno-reorder
+QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x
 
 TARGET = glengine
 TEMPLATE = lib
@@ -103,5 +103,6 @@ HEADERS += \
     engine/framebuffer/framebuffer_attachment.h \
     utils/stl_utils.h \
     engine/framebuffer_manager.h \
-    include/gleviewport.h
+    include/gleviewport.h \
+    include/gleblending.h
 

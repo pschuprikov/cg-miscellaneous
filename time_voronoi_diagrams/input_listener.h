@@ -10,6 +10,10 @@ struct i_input_info
 {
     virtual int x() const = 0;
     virtual int y() const = 0;
+
+    virtual bool alt_pressed() const = 0;
+    virtual bool ctrl_pressed() const = 0;
+    virtual bool shift_pressed() const = 0;
 protected:
     ~i_input_info() {}
 };

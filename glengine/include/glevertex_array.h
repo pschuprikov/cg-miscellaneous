@@ -15,7 +15,7 @@ struct i_vertex_array
 {
     virtual GLuint gl_id() const = 0;
 
-    virtual void add_vertex_attrib(shader_input_variable_ptr var, vertex_format_ptr fmt,
+    virtual void add_vertex_attrib(shader_input_variable_ptr var, vertex_format_t fmt,
                                    vertex_attrib_binding_t binding) = 0;
     virtual void remove_vertex_attrib(shader_input_variable_ptr var) = 0;
 
@@ -26,6 +26,12 @@ struct i_vertex_array
                              int offset, int stride) = 0;
     virtual buffer_ptr binding(vertex_attrib_binding_t binding) const = 0;
     virtual void unbind_buffer(vertex_attrib_binding_t binding) = 0;
+
+    virtual void bind_element_buffer(buffer_ptr buf) = 0;
+    virtual buffer_ptr element_binding() const = 0;
+
+    virtual void set_primitive_restart_index(boost::optional<size_t> idx) = 0;
+    virtual boost::optional<size_t> primitive_restart_index() const = 0;
 
     virtual ~i_vertex_array() {}
 };

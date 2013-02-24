@@ -11,6 +11,7 @@
 #include <gleframebuffer_manager.h>
 
 #include <gleviewport.h>
+#include <gleblending.h>
 
 namespace gle
 {
@@ -31,7 +32,7 @@ namespace gle
 
     inline memory_barrier_bit_t operator|(memory_barrier_bit_t lhs, memory_barrier_bit_t rhs)
     {
-        return memory_barrier_bit_t((int) lhs | (int) rhs);
+        return memory_barrier_bit_t((unsigned int) lhs | (unsigned int) rhs);
     }
 
     enum bit_plane_bit_t { BPB_color = GL_COLOR_BUFFER_BIT,
@@ -40,14 +41,26 @@ namespace gle
 
     inline bit_plane_bit_t operator|(bit_plane_bit_t lhs, bit_plane_bit_t rhs)
     {
-        return bit_plane_bit_t((int) lhs | (int) rhs);
+        return bit_plane_bit_t((unsigned int) lhs | (unsigned int) rhs);
     }
 
-    enum engine_state_bit_t { ES_depth_test = 1 };
+    enum engine_state_bit_t { ES_depth_test = 1,
+                              ES_blend = 1 << 1,
+                              ES_line_smooth = 1 << 2 };
 
     inline engine_state_bit_t operator|(engine_state_bit_t lhs, engine_state_bit_t rhs)
     {
-        return engine_state_bit_t((int) lhs | (int) rhs);
+        return engine_state_bit_t((unsigned int) lhs | (unsigned int) rhs);
+    }
+
+    inline engine_state_bit_t operator&(engine_state_bit_t lhs, engine_state_bit_t rhs)
+    {
+        return engine_state_bit_t((unsigned int) lhs & (unsigned int) rhs);
+    }
+
+    inline engine_state_bit_t operator~(engine_state_bit_t s)
+    {
+        return engine_state_bit_t(~(unsigned int)s);
     }
 
     inline GLenum gl_state(engine_state_bit_t st)
@@ -55,12 +68,13 @@ namespace gle
         switch(st)
         {
         case ES_depth_test : return GL_DEPTH_TEST;
+        case ES_blend : return GL_BLEND;
+        case ES_line_smooth : return GL_LINE_SMOOTH;
         default : return 0;
         }
     }
 
     enum framebuffer_filter_t { FF_linear = GL_LINEAR, FF_nearest = GL_NEAREST };
-
 
     struct i_engine
     {
@@ -99,6 +113,14 @@ namespace gle
         // state management
         virtual void enable(engine_state_bit_t bits) = 0;
         virtual void disable(engine_state_bit_t bits) = 0;
+
+        // pixel operations
+        virtual blending_t blending() const = 0;
+        virtual void set_blending(blending_t const& blending) = 0;
+
+        // rasterization
+        virtual float line_width() const = 0;
+        virtual void set_line_width(float width) = 0;
 
         virtual ~i_engine() {}
     };

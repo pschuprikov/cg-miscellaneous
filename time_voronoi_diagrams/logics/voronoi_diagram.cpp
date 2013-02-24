@@ -9,7 +9,7 @@ voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
     : main_(main)
     , proc_(NULL)
     , rastr_(2000, 2000)
-    , jfa_(100, 0.1)
+    , jfa_(1, 0.1)
 {}
 
 void voronoi_diagram_t::treat(i_io_provider * io)
@@ -29,27 +29,31 @@ void voronoi_diagram_t::key_pressed(const i_keyboard_input_info * ev)
         proc_->set_next_logic(main_->lines_builder());
         break;
     case 'p':
+    case 'P':
     {
-            increase_outer_velocity();
-            run_jfa();
+        increase_outer_velocity(ev->key_pressed() == 'P');
+        run_jfa();
     } break;
     case 'o':
+    case 'O':
     {
-        decrease_outer_velocity();
+        decrease_outer_velocity(ev->key_pressed() == 'O');
         run_jfa();
     } break;
 
     }
 }
 
-void voronoi_diagram_t::increase_outer_velocity()
+void voronoi_diagram_t::increase_outer_velocity(bool presice)
 {
-    jfa_.set_outer_velocity(std::min(1., jfa_.outer_velocity() + 0.02));
+    double increase = presice ? 0.001 : 0.02;
+    jfa_.set_outer_velocity(std::min(1., jfa_.outer_velocity() + increase));
 }
 
-void voronoi_diagram_t::decrease_outer_velocity()
+void voronoi_diagram_t::decrease_outer_velocity(bool presice)
 {
-    jfa_.set_outer_velocity(std::max(0., jfa_.outer_velocity() - 0.02));
+    double decrease = presice ? 0.001 : 0.02;
+    jfa_.set_outer_velocity(std::max(0., jfa_.outer_velocity() - decrease));
 }
 
 void voronoi_diagram_t::run_jfa()

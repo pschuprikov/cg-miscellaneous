@@ -30,9 +30,9 @@ namespace gle
         struct attrib_data_t
         {
             shader_input_variable_ptr var;
-            vertex_format_ptr fmt;
+            vertex_format_t fmt;
             vertex_attrib_binding_t binding;
-            attrib_data_t(shader_input_variable_ptr var, vertex_format_ptr fmt, vertex_attrib_binding_t binding)
+            attrib_data_t(shader_input_variable_ptr var, vertex_format_t fmt, vertex_attrib_binding_t binding)
                 : var(var), fmt(fmt), binding(binding)
             {}
         };
@@ -42,18 +42,23 @@ namespace gle
 
         attrib_map_t attribs;
         binding_map_t buffers;
+        buffer_ptr element_buffer;
+
+        boost::optional<size_t> primitive_restart_idx;
     };
 
     vertex_array_t::vertex_array_t(GLuint id, i_vertex_array_manager *owner)
         : id_(id)
         , attribs_applied_(true)
         , bindings_applied_(true)
+        , element_binding_applied_(true)
+        , primitive_restart_index_applied_(true)
         , storage_(new storage_t())
         , owner_(owner)
     {}
 
-    void vertex_array_t::add_vertex_attrib(shader_input_variable_ptr var, vertex_format_ptr fmt,
-                                   vertex_attrib_binding_t binding)
+    void vertex_array_t::add_vertex_attrib(shader_input_variable_ptr var,
+        vertex_format_t fmt, vertex_attrib_binding_t binding)
     {
         attribs_applied_ = false;
         storage_->attribs.insert(std::make_pair(var->location(), storage_t::attrib_data_t(var, fmt, binding)));
@@ -93,12 +98,28 @@ namespace gle
         storage_->buffers.erase(binding);
     }
 
+    namespace
+    {
+        struct format_visitor_t : boost::static_visitor<>
+        {
+            format_visitor_t(shader_input_variable_ptr var) : var_(var) {}
+
+            void operator()(int_vertex_format const& ivf) const
+            { ivf.set_format(var_); }
+
+            void operator()(float_vertex_format const& fvf) const
+            { fvf.set_format(var_); }
+        private:
+            shader_input_variable_ptr var_;
+        };
+    }
+
     void vertex_array_t::apply_formats()
     {
         for (storage_t::attrib_map_t::const_iterator a_it = storage_->attribs.begin();
              a_it != storage_->attribs.end(); ++a_it)
         {
-            a_it->second.fmt->set_format(a_it->second.var);
+            boost::apply_visitor(format_visitor_t(a_it->second.var), a_it->second.fmt);
         }
     }
 
@@ -109,6 +130,25 @@ namespace gle
         {
             glVertexAttribBinding(a_it->first, a_it->second.binding);
         }
+    }
+
+    void vertex_array_t::apply_element_binding()
+    {
+        if (storage_->element_buffer)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, storage_->element_buffer->gl_id());
+        else
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    void vertex_array_t::apply_primitive_restart_index()
+    {
+        if (storage_->primitive_restart_idx)
+        {
+            glPrimitiveRestartIndex(*storage_->primitive_restart_idx);
+            glEnable(GL_PRIMITIVE_RESTART);
+        }
+        else
+            glDisable(GL_PRIMITIVE_RESTART);
     }
 
     void vertex_array_t::remove_vertex_attrib(shader_input_variable_ptr var)
@@ -144,6 +184,27 @@ namespace gle
             apply();
     }
 
+    void vertex_array_t::bind_element_buffer(buffer_ptr buf)
+    {
+        element_binding_applied_ = false;
+        storage_->element_buffer = buf;
+    }
+
+    buffer_ptr vertex_array_t::element_binding() const
+    {
+        return storage_->element_buffer;
+    }
+
+    void vertex_array_t::set_primitive_restart_index(boost::optional<size_t> idx)
+    {
+        primitive_restart_index_applied_ = false;
+        storage_->primitive_restart_idx = idx;
+    }
+
+    boost::optional<size_t> vertex_array_t::primitive_restart_index() const
+    {
+        return storage_->primitive_restart_idx;
+    }
 
     vertex_array_t::~vertex_array_t() {}
 }

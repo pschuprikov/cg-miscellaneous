@@ -17,6 +17,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
+#include <boost/optional.hpp>
 
 
 #endif // GLECOMMON_H

@@ -1,13 +1,16 @@
-#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "io_utils.h"
 
 namespace gle
 {
 
+namespace bfs = boost::filesystem;
+
 void utils::load_file_contents(std::string file_name, std::vector<char> &buffer, std::ios_base::openmode mode)
 {
-    std::ifstream stin(file_name.c_str(), mode);
+    bfs::ifstream stin(bfs::current_path() / file_name, mode);
     if (!stin)
         throw std::invalid_argument("file not found!");
     stin.seekg(0, std::ios_base::end);

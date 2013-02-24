@@ -37,7 +37,7 @@ float cross_2d(in vec2 v1, in vec2 v2)
     return fma(v1.x, v2.y, -v1.y * v2.x);
 }
 
-vec2 calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
+float calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
 {
    float cur_dist = max_distance * 2;
 
@@ -80,12 +80,21 @@ vec2 calc_optimal(in vec4 seg, in float prefix_dist, in vec2 pos)
    {
       cur_dist = distance(pos, seg.zw) * ov_rec + distance(seg.xy, seg.zw);
    }
-   return vec2(cur_dist + prefix_dist);
+   return cur_dist + prefix_dist;
 }
 
 const ivec2 max_idx = imageSize(img_vd_in) - 1;
 const ivec2 my_coord = ivec2(min(gl_GlobalInvocationID.xy, max_idx));
 const vec2 pos = my_coord / vec2(imageSize(img_vd_in));
+
+void check_best(inout float min_dist, inout uvec4 best, in const uvec4 cur, in const float cur_dist)
+{
+    if (cur_dist < min_dist && cur_dist < max_distance && cur != uvec4(0))
+    {
+       min_dist = cur_dist;
+       best = cur;
+    }
+}
 
 void main(void)
 {
@@ -99,25 +108,16 @@ void main(void)
        {
           ivec2 coord = my_coord + ivec2(i, j) * jump_step;
 
-          if ((lessThan(coord, ivec2(0)) || greaterThan(coord, max_idx)) != bvec2(0))
+          if ((lessThan(coord, ivec2(0)) || greaterThan(coord, max_idx)) != false)
               continue;
 
           uvec4 cur = imageLoad(img_vd_in, coord);
 
-          if (cur != uvec4(0))
-              continue;
-
           vec4 seg;
           float prefix_dist;
+
           unpack_params(cur, seg, prefix_dist);
-
-          float cur_dist = calc_optimal(seg, prefix_dist, pos).x;
-
-          if (cur_dist < min_dist && cur_dist < max_distance && cur != uvec4(0))
-          {
-             min_dist = cur_dist;
-             best = cur;
-          }
+          check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist, pos));
        }
     }
 

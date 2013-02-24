@@ -1,6 +1,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <bitset>
+
 #include <glengine.h>
 
 #include "query_object_manager.h"
@@ -15,7 +17,7 @@ namespace gle
     struct engine_t
         : i_engine
     {
-        engine_t() { glewInit(); }
+        engine_t();
 
         i_query_object_manager * queries() { return &query_manager_; }
         i_buffer_object_manager * buffers() { return &buffer_manager_; }
@@ -53,6 +55,14 @@ namespace gle
         void enable(engine_state_bit_t bits);
         void disable(engine_state_bit_t bits);
 
+        // per pixel operation
+        blending_t blending() const;
+        void set_blending(blending_t const& blending);
+
+        // rasterization
+        float line_width() const;
+        void set_line_width(float width);
+
     private:
         query_object_manager_t query_manager_;
         buffer_object_manager_t buffer_manager_;
@@ -62,6 +72,10 @@ namespace gle
         framebuffer_manager_t fbo_manager_;
 
         viewport_t viewport_;
+        blending_t blending_;
+
+        engine_state_bit_t state_;
+        float line_width_;
     };
 }
 

@@ -40,8 +40,8 @@ public:
     void render();
 
 private:
-    void increase_outer_velocity();
-    void decrease_outer_velocity();
+    void increase_outer_velocity(bool presice = false);
+    void decrease_outer_velocity(bool presice = false);
 
     void run_jfa();
 

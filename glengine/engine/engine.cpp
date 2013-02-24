@@ -11,6 +11,8 @@ gle::i_engine * gle::default_engine()
 namespace gle
 {
 
+engine_t::engine_t() : line_width_(1) { glewInit(); }
+
 void engine_t::memory_barrier(memory_barrier_bit_t barriers)
 {
     glMemoryBarrier(barriers);
@@ -70,12 +72,22 @@ void engine_t::enable(engine_state_bit_t bits)
 {
     if (bits & ES_depth_test)
         glEnable(gl_state(ES_depth_test));
+    if (bits & ES_blend)
+        glEnable(gl_state(ES_blend));
+    if (bits & ES_line_smooth)
+        glEnable(gl_state(ES_line_smooth));
+    state_ = state_ | bits;
 }
 
 void engine_t::disable(engine_state_bit_t bits)
 {
     if (bits & ES_depth_test)
         glDisable(gl_state(ES_depth_test));
+    if (bits & ES_blend)
+        glDisable(gl_state(ES_blend));
+    if (bits & ES_line_smooth)
+        glDisable(gl_state(ES_line_smooth));
+    state_ = state_ & ~bits;
 }
 
 void engine_t::blit_framebuffer(int src_x0, int src_y0, int src_x1, int src_y1,
@@ -85,5 +97,27 @@ void engine_t::blit_framebuffer(int src_x0, int src_y0, int src_x1, int src_y1,
     glBlitFramebuffer(src_x0, src_y0, src_x1, src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter);
 }
 
+blending_t engine_t::blending() const
+{
+    return blending_;
+}
+
+void engine_t::set_blending(blending_t const& blending)
+{
+    blending_ = blending;
+    glBlendEquation(blending.equation());
+    glBlendFunc(blending.src(), blending.dst());
+}
+
+float engine_t::line_width() const
+{
+    return line_width_;
+}
+
+void engine_t::set_line_width(float width)
+{
+    line_width_ = width;
+    glLineWidth(line_width_);
+}
 
 }

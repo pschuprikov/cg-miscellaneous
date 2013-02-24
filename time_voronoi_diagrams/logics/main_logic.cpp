@@ -6,7 +6,6 @@ namespace tvd
 void main_logic_t::treat(i_io_provider * io)
 {
     io->input()->register_input_listener(this);
-    io->rendering()->register_renderable(this);
     if (!lines_builder_)
     {
         lines_builder_.reset(new lines_builder_t(this));
