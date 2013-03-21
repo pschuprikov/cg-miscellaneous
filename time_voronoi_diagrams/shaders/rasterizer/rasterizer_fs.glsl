@@ -9,17 +9,18 @@ in gs_output
     flat float dist;
 } f_in;
 
-layout(location = 0) out uvec4 out_color;
+layout(location = 0) out uvec2 out_seg;
+layout(location = 1) out uint out_dist_color;
 
 void main()
 {
-    uvec2 fst_snd;
-    fst_snd.x = packUnorm2x16(f_in.fst);
-    fst_snd.y = packUnorm2x16(f_in.snd);
+    uvec2 seg;
+    seg.x = packUnorm2x16(f_in.fst);
+    seg.y = packUnorm2x16(f_in.snd);
 
-    uvec2 color_dist;
-    color_dist.x = packHalf2x16(color.xy);
-    color_dist.y = packHalf2x16(vec2(color.z, f_in.dist));
+    uint dist_color;
+    dist_color = packHalf2x16(vec2(f_in.dist, color.x));
 
-    out_color = uvec4(fst_snd, color_dist);
+    out_seg = seg;
+    out_dist_color = dist_color;
 }

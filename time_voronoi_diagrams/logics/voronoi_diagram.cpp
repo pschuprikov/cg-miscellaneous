@@ -8,8 +8,8 @@ namespace tvd
 voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
     : main_(main)
     , proc_(NULL)
-    , rastr_(2000, 2000)
-    , jfa_(1, 0.1)
+    , rastr_(1024, 1024)
+    , jfa_(5, 0.5)
 {}
 
 void voronoi_diagram_t::treat(i_io_provider * io)
@@ -59,11 +59,10 @@ void voronoi_diagram_t::decrease_outer_velocity(bool presice)
 void voronoi_diagram_t::run_jfa()
 {
     gle::time_elapsed_query_ptr teq = gle::default_engine()->queries()->create_time_elapsed_query();
-    rastr_.blit_tex();
 
     teq->begin_query();
 
-    jfa_.process(rastr_.tex());
+    jfa_.process(rastr_.tex_seg(), rastr_.tex_dist_col());
     gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
 
     teq->end_query();
@@ -77,7 +76,7 @@ void voronoi_diagram_t::run_jfa()
 void voronoi_diagram_t::render()
 {
     gle::default_engine()->disable(gle::ES_depth_test);
-    tex_draw_.draw_tex(rastr_.tex());
+    tex_draw_.draw_tex(rastr_.tex_dist_col());
     gle::default_engine()->enable(gle::ES_depth_test);
 }
 

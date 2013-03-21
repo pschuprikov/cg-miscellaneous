@@ -5,17 +5,19 @@ in vs_output
     vec2 st;
 } f_in;
 
-uniform layout(rgba32ui) readonly uimage2D img_vd;
+uniform layout(r32ui) readonly uimage2D img_vd;
 
 layout(location = 0) out vec4 out_color;
 
 void main(void)
 {
-    uvec2 packed_color_dist = imageLoad(img_vd, ivec2(f_in.st * imageSize(img_vd))).zw;
+    uint packed_dist_color = imageLoad(img_vd, ivec2(f_in.st * imageSize(img_vd))).r;
 
-    vec4 color_dist;
-    color_dist.xy = unpackHalf2x16(packed_color_dist.x);
-    color_dist.zw = unpackHalf2x16(packed_color_dist.y);
+    vec2 dist_color;
+    dist_color = unpackHalf2x16(packed_dist_color);
 
-    out_color = vec4(color_dist.rgb * 0.5, 1);
+    if (dist_color.y >= -0.5)
+        out_color = vec4(dist_color.y, 1 - dist_color.y, 0, 0);
+    else
+        out_color = vec4(0);
 }

@@ -5,7 +5,7 @@ CONFIG += console debug
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x
+QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x -pg
 
 SOURCES += main.cpp \
     core/input_manager.cpp \
@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     logics/gpgpu_vd/rasterizer.cpp \
     logics/gpgpu_vd/voronoi_texdraw.cpp \
     logics/gpgpu_vd/jump_flood.cpp \
-    logics/lines_loader.cpp
+    logics/lines_loader.cpp \
+    renderers/drawing_utils.cpp
 
 PRECOMPILED_HEADER = stdafx.h
 
@@ -54,7 +55,8 @@ HEADERS += \
     logics/gpgpu_vd/voronoi_texdraw.h \
     logics/gpgpu_vd/jump_flood.h \
     logics/lines_loader.h \
-    lines_common.h
+    lines_common.h \
+    renderers/drawing_utils.h
 
 LINES_DATA_FILE = lines.dat
 
@@ -66,7 +68,9 @@ SHADER_FILES = \
     shaders/rasterizer/rasterizer_gs.glsl \
     shaders/rasterizer/rasterizer_vs.glsl \
     shaders/texdraw/texdraw_fs.glsl \
-    shaders/texdraw/texdraw_vs.glsl
+    shaders/texdraw/texdraw_vs.glsl \
+    shaders/rasterizer_clean/rasterizer_clean_vs.glsl \
+    shaders/rasterizer_clean/rasterizer_clean_fs.glsl
 
 OTHER_FILES += $$SHADER_FILES $$LINES_DATA_FILE
 

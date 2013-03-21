@@ -1,4 +1,5 @@
 #include "rasterizer.h"
+#include "renderers/drawing_utils.h"
 
 namespace tvd
 {
@@ -6,10 +7,11 @@ namespace tvd
 struct rasterizer_t::impl_t
 {
     gle::vertex_attrib_binding_t vtx_binding;
-    int out_location;
-    int tmp_location;
+    int seg_att;
+    int dist_col_att;
 
     gle::program_ptr prg;
+    gle::program_ptr clean_prg;
     gle::vertex_array_ptr vao;
     gle::framebuffer_ptr fbo;
 
@@ -45,6 +47,24 @@ private:
         {
             std::cerr << exc.name() << "\n" << exc.reason() << "\n";
         }
+
+        clean_prg = gle::default_engine()->programs()->create_program("rasterizer_clean");
+        try
+        {
+            gle::shader_ptr fs = gle::default_engine()->programs()->load_shader(
+                "shaders/rasterizer_clean_fs.glsl",
+                gle::ST_fragment);
+            gle::shader_ptr vs = gle::default_engine()->programs()->load_shader(
+                "shaders/rasterizer_clean_vs.glsl",
+                gle::ST_vertex);
+            clean_prg->attach_shader(fs);
+            clean_prg->attach_shader(vs);
+            clean_prg->link();
+        }
+        catch (gle::compilation_failed_exception_t const& exc)
+        {
+            std::cerr << exc.name() << "\n" << exc.reason() << "\n";
+        }
     }
 
     void setup_vao()
@@ -66,39 +86,24 @@ private:
         gle::texture_ptr tex0 = gle::default_engine()->textures()->create_texture(gle::TT_2d);
         tex0->set_mag_filter(gle::TMAGF_nearest);
         tex0->set_min_filter(gle::TMINF_nearest);
-        tex0->image_2d(0, GL_RGBA32UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, NULL);
+        tex0->image_2d(0, GL_RG32UI, width, height, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, NULL);
 
         gle::texture_ptr tex_tmp = gle::default_engine()->textures()->create_texture(gle::TT_2d);
         tex_tmp->set_mag_filter(gle::TMAGF_nearest);
         tex_tmp->set_min_filter(gle::TMINF_nearest);
-        tex_tmp->image_2d(0, GL_RGBA32UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, NULL);
+        tex_tmp->image_2d(0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
-        out_location = 0;
-        tmp_location = 1;
+        seg_att = 0;
+        dist_col_att = 1;
 
-        fbo->color_attachment(out_location)->attach_texture(tex0, 0);
-        fbo->color_attachment(tmp_location)->attach_texture(tex_tmp, 0);
+        fbo->color_attachment(seg_att)->attach_texture(tex0, 0);
+        fbo->color_attachment(dist_col_att)->attach_texture(tex_tmp, 0);
 
+        std::vector<int> buffers(2);
 
-        std::vector<int> buffers(1);
-
-        buffers.front() = out_location;
+        buffers[0] = seg_att;
+        buffers[1] = dist_col_att;
         fbo->set_draw_buffers(buffers);
-
-        fbo->set_read_buffer(tmp_location);
-    }
-
-public:
-    void swap_buffers()
-    {
-        static std::vector<int> buffers(1);
-
-        std::swap(out_location, tmp_location);
-
-        buffers.front() = out_location;
-        fbo->set_draw_buffers(buffers);
-
-        fbo->set_read_buffer(tmp_location);
     }
 };
 
@@ -112,14 +117,16 @@ rasterizer_t::~rasterizer_t() {}
 void rasterizer_t::begin_rasterization()
 {
     old_vp_ = gle::default_engine()->viewport();
-    gle::default_engine()->set_viewport(gle::viewport_t(0, 0, tex()->width(), tex()->height()));
+    gle::default_engine()->set_viewport(
+                gle::viewport_t(0, 0, tex_seg()->width(), tex_seg()->height()));
 
-    gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->fbos()->set_draw_framebuffer(impl_->fbo);
-    gle::default_engine()->programs()->use(impl_->prg);
 
-    gle::default_engine()->clear_color(glm::vec4(0, 0, 0, 0));
-    gle::default_engine()->clear(gle::BPB_color);
+    gle::default_engine()->programs()->use(impl_->clean_prg);
+    quad01::draw(impl_->clean_prg->input_var("in_pos"));
+
+    gle::default_engine()->programs()->use(impl_->prg);
+    gle::default_engine()->vaos()->set_current(impl_->vao);
 
     gle::default_engine()->disable(gle::ES_depth_test);
 }
@@ -142,30 +149,17 @@ void rasterizer_t::end_rasterization()
     gle::default_engine()->vaos()->reset_current();
 
     gle::default_engine()->fbos()->set_draw_framebuffer_default();
-    impl_->swap_buffers();
-
-    blit_tex();
-
     gle::default_engine()->set_viewport(old_vp_);
 }
 
-void rasterizer_t::blit_tex()
+gle::texture_ptr rasterizer_t::tex_seg() const
 {
-    gle::default_engine()->fbos()->set_draw_framebuffer(impl_->fbo);
-    gle::default_engine()->fbos()->set_read_framebuffer(impl_->fbo);
-
-    int width = tex()->width();
-    int height = tex()->height();
-
-    gle::default_engine()->blit_framebuffer(0, 0, width, height, 0, 0, width, height,
-                                            gle::BPB_color, gle::FF_nearest);
-    gle::default_engine()->fbos()->set_draw_framebuffer_default();
-    gle::default_engine()->fbos()->set_read_framebuffer_default();
+    return impl_->fbo->color_attachment(impl_->seg_att)->texture();
 }
 
-gle::texture_ptr rasterizer_t::tex() const
+gle::texture_ptr rasterizer_t::tex_dist_col() const
 {
-    return impl_->fbo->color_attachment(impl_->out_location)->texture();
+    return impl_->fbo->color_attachment(impl_->dist_col_att)->texture();
 }
 
 }

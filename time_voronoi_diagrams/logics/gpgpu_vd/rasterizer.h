@@ -30,7 +30,8 @@ struct rasterizer_t
     }
 
     void blit_tex();
-    gle::texture_ptr tex() const;
+    gle::texture_ptr tex_seg() const;
+    gle::texture_ptr tex_dist_col() const;
 
 private:
     void begin_rasterization();

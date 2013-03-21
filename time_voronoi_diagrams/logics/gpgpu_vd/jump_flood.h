@@ -11,7 +11,7 @@ struct jump_flood_t
     jump_flood_t(float max_distance, float out_velocity);
     ~jump_flood_t();
 
-    void process(gle::texture_ptr tex);
+    void process(gle::texture_ptr tex_seg, gle::texture_ptr tex_dist_col);
 
     float max_distance() const { return max_distance_; }
     void set_max_distance(float max_distance) { max_distance_ = max_distance; }
