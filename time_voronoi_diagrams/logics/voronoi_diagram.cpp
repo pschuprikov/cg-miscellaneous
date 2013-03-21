@@ -9,7 +9,7 @@ voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
     : main_(main)
     , proc_(NULL)
     , rastr_(2048, 2048)
-    , jfa_(1, 0.1)
+    , jfa_(0.2, 0.01)
 {}
 
 void voronoi_diagram_t::treat(i_io_provider * io)

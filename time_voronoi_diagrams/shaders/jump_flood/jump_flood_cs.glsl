@@ -66,16 +66,16 @@ float calc_optimal(inout vec4 seg, inout float prefix_dist)
 
       proj = dot(dir1, r1) * dir1;
       maybe_dist_sqr = dot(r1 - proj, r1 - proj) * ov_rec;
-      if (c1 >= 0)
+      if (c1 * dot(proj, dir) >= 0)
          cur_dist_sqr = min(maybe_dist_sqr, cur_dist_sqr);
 
       proj = dot(dir2, r1) * dir2;
       maybe_dist_sqr = dot(r1 - proj, r1 - proj) * ov_rec;
-      if (c1 <= 0 && maybe_dist_sqr < cur_dist_sqr)
+      if (c1 * dot(proj, dir) <= 0)
           cur_dist_sqr = min(maybe_dist_sqr, cur_dist_sqr);
    }
 
-   maybe_dist_sqr = dot(pos - seg.xy, pos - seg.xy);
+   maybe_dist_sqr = dot(pos - seg.xy, pos - seg.xy) * ov_rec;
    if (maybe_dist_sqr < cur_dist_sqr)
       cur_dist_sqr = maybe_dist_sqr;
 
