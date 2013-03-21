@@ -72,7 +72,8 @@ SHADER_FILES = \
     shaders/rasterizer_clean/rasterizer_clean_vs.glsl \
     shaders/rasterizer_clean/rasterizer_clean_fs.glsl
 
-OTHER_FILES += $$SHADER_FILES $$LINES_DATA_FILE
+OTHER_FILES += $$SHADER_FILES $$LINES_DATA_FILE \
+    shaders/rasterizer/rasterizer_gs.glsl
 
 shaders.path=$$OUT_PWD/shaders/
 shaders.files += $$SHADER_FILES

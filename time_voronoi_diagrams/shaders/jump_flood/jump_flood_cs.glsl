@@ -1,6 +1,6 @@
 #version 430
 
-layout(local_size_x = 16, local_size_y = 16) in;
+layout(local_size_x = 128, local_size_y = 2) in;
 
 uniform vec3 outer_params; // sin_alpha (outer_velocity)
                             // 1 / outer_velocity
@@ -22,18 +22,14 @@ uniform mat2 velocity_rotation;
 
 uniform int jump_step;
 
-uniform layout(rg32ui) uimage2D img_vd;
-uniform layout(r32ui) uimage2D img_vd_dc;
+uniform layout(r16ui) uimage2D img_vd;
+uniform layout(rgba32ui) readonly uimage1D img_lines_data;
 
-void unpack_seg(in uvec2 texel, out vec4 segment)
+void unpack_seg(in uvec4 texel, out vec4 segment, out float max_dist)
 {
     segment.xy = unpackUnorm2x16(texel.x);
     segment.zw = unpackUnorm2x16(texel.y);
-}
-
-void unpack_dc(in uint texel, out float prefix_distance)
-{
-    prefix_distance = unpackHalf2x16(texel).x;
+    max_dist = unpackHalf2x16(texel.z)[0];
 }
 
 float cross_2d(inout vec2 v1, inout vec2 v2)
@@ -91,8 +87,8 @@ const ivec2 max_idx = imageSize(img_vd) - 1;
 const ivec2 my_coord = ivec2(min(gl_GlobalInvocationID.xy, max_idx));
 const vec2 pos = my_coord / vec2(imageSize(img_vd));
 
-void check_best(inout float min_dist, inout uvec3 best,
-                in const uvec3 cur, in const float cur_dist)
+void check_best(inout float min_dist, inout uint best,
+                in const uint cur, in const float cur_dist)
 {
     if (cur_dist < min_dist && cur_dist < max_distance)
     {
@@ -105,7 +101,7 @@ void main(void)
 {
     float min_dist = max_distance * 2;
 
-    uvec3 best;
+    uint best;
 
     for (int i = -1; i <= 1; i++)
     {
@@ -113,23 +109,20 @@ void main(void)
        {
           ivec2 coord = my_coord + ivec2(i, j) * jump_step;
 
-          uvec3 cur;
-          cur.z = imageLoad(img_vd_dc, clamp(coord, ivec2(0), max_idx)).r;
+          uint cur = imageLoad(img_vd, clamp(coord, ivec2(0), max_idx)).r;
 
-          float prefix_dist;
-          unpack_dc(cur.z, prefix_dist);
-          if (prefix_dist >= -0.5)
+          if (cur != 0xffff)
           {
-            vec4 seg;
-            cur.xy = imageLoad(img_vd, clamp(coord, ivec2(0), max_idx)).rg;
-            unpack_seg(cur.xy, seg);
-            check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist, pos));
+              vec4 seg;
+              float prefix_dist;
+              uvec4 texel = imageLoad(img_lines_data, int(cur));
+              unpack_seg(texel, seg, prefix_dist);
+              check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist, pos));
           }
        }
     }
 
-    if (min_dist != max_distance * 2) {
-        imageStore(img_vd, my_coord, uvec4(best.xy, 0, 0));
-        imageStore(img_vd_dc, my_coord, uvec4(best.z, 0, 0, 0));
+    if (min_dist < max_distance * 2) {
+        imageStore(img_vd, my_coord, uvec4(best));
     }
 }

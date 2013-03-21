@@ -11,6 +11,7 @@ struct voronoi_texdraw_t::impl_t
     gle::program_ptr prg;
 
     gle::shader_variable_ptr img_vd;
+    gle::shader_variable_ptr img_vd_data;
 
     impl_t()
     {
@@ -38,6 +39,7 @@ private:
             std::cerr << exc.name() << "\n" << exc.reason() << "\n";
         }
         img_vd = prg->var("img_vd");
+        img_vd_data = prg->var("img_vd_data");
         glm::mat4 mvp = glm::ortho<float>(0, 1, 0, 1, -1, 1);
         prg->var("mvp")->set(mvp);
     }
@@ -50,14 +52,18 @@ voronoi_texdraw_t::voronoi_texdraw_t()
 
 voronoi_texdraw_t::~voronoi_texdraw_t() {}
 
-void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex)
+void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex, gle::texture_ptr tex_data)
 {
     gle::default_engine()->programs()->use(impl_->prg);
 
     gle::image_binding_t img_binding = gle::default_engine()->textures()->reserve_image_binding();
-    gle::default_engine()->textures()->bind_image(img_binding, tex, 0, gle::ITA_read_only, GL_R32UI);
+    gle::default_engine()->textures()->bind_image(img_binding, tex, 0, gle::ITA_read_only, GL_R16UI);
+
+    gle::image_binding_t img_binding_data = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(img_binding_data, tex_data, 0, gle::ITA_read_write, GL_RGBA32UI);
 
     impl_->img_vd->set(img_binding);
+    impl_->img_vd_data->set(img_binding_data);
     quad01::draw(impl_->prg->input_var("in_pos"));
 
     gle::default_engine()->textures()->release_image_binding(img_binding);

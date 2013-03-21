@@ -12,7 +12,7 @@ struct jump_flood_t::impl_t
     gle::shader_variable_ptr jump_step;
 
     gle::shader_variable_ptr img_vd;
-    gle::shader_variable_ptr img_vd_dc;
+    gle::shader_variable_ptr img_lines_data;
 
     impl_t()
     {
@@ -27,7 +27,7 @@ private:
         jump_step = prg->var("jump_step");
 
         img_vd = prg->var("img_vd");
-        img_vd_dc = prg->var("img_vd_dc");
+        img_lines_data = prg->var("img_lines_data");
     }
 
     void load_program()
@@ -56,15 +56,16 @@ jump_flood_t::jump_flood_t(float max_distance, float outer_velocity)
 
 jump_flood_t::~jump_flood_t() {}
 
-void jump_flood_t::process(gle::texture_ptr tex_seg, gle::texture_ptr tex_dist_col)
+void jump_flood_t::process(gle::texture_ptr tex_rastr, gle::texture_ptr tex_lines_data)
 {
-    gle::image_binding_t bin_seg = gle::default_engine()->textures()->reserve_image_binding();
-    gle::image_binding_t bin_dc = gle::default_engine()->textures()->reserve_image_binding();
-    gle::default_engine()->textures()->bind_image(bin_seg, tex_seg, 0, gle::ITA_read_write, GL_RG32UI);
-    gle::default_engine()->textures()->bind_image(bin_dc, tex_dist_col, 0, gle::ITA_read_write, GL_R32UI);
+    gle::image_binding_t bin_rastr = gle::default_engine()->textures()->reserve_image_binding();
+    gle::image_binding_t bin_data = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(bin_rastr, tex_rastr, 0, gle::ITA_read_write, GL_R16UI);
+    gle::default_engine()->textures()->
+            bind_image(bin_data, tex_lines_data, 0, gle::ITA_read_only, GL_RGBA32UI);
 
-    impl_->img_vd->set(bin_seg);
-    impl_->img_vd_dc->set(bin_dc);
+    impl_->img_vd->set(bin_rastr);
+    impl_->img_lines_data->set(bin_data);
     impl_->max_distance->set(max_distance_);
 
     double const sin_alpha = outer_velocity_;
@@ -74,27 +75,27 @@ void jump_flood_t::process(gle::texture_ptr tex_seg, gle::texture_ptr tex_dist_c
 
     gle::default_engine()->programs()->use(impl_->prg);
 
-    int const max_dim = std::max(tex_seg->width(), tex_seg->height());
+    int const max_dim = std::max(tex_rastr->width(), tex_rastr->height());
 
     int step;
     for (step = 1; step << 1 < max_dim; step <<= 1)
         ;
 
-    int const group_size = 16;
+    int const group_size_x = 128;
+    int const group_size_y = 2;
+    int const xdim = (tex_rastr->width() + group_size_x - 1) / group_size_x;
+    int const ydim = (tex_rastr->height() + group_size_y - 1) / group_size_y;
+
     for (; step > 0; step >>= 1)
     {
         impl_->jump_step->set(step);
-
-        gle::default_engine()->dispatch_compute((tex_seg->width() + group_size - 1) / group_size,
-            (tex_seg->height() + group_size - 1) / group_size, 1);
+        gle::default_engine()->dispatch_compute(xdim, ydim, 1);
     }
-    gle::default_engine()->dispatch_compute((tex_seg->width() + group_size - 1) / group_size,
-        (tex_seg->height() + group_size - 1) / group_size, 1);
-    gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
+    gle::default_engine()->dispatch_compute(xdim, ydim, 1);
 
     gle::default_engine()->programs()->reset_program_in_use();
-    gle::default_engine()->textures()->release_image_binding(bin_seg);
-    gle::default_engine()->textures()->release_image_binding(bin_dc);
+    gle::default_engine()->textures()->release_image_binding(bin_rastr);
+    gle::default_engine()->textures()->release_image_binding(bin_data);
 }
 
 }

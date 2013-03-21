@@ -62,7 +62,7 @@ void voronoi_diagram_t::run_jfa()
 
     teq->begin_query();
 
-    jfa_.process(rastr_.tex_seg(), rastr_.tex_dist_col());
+    jfa_.process(rastr_.tex_rastr(), rastr_.tex_data());
     gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
 
     teq->end_query();
@@ -76,7 +76,7 @@ void voronoi_diagram_t::run_jfa()
 void voronoi_diagram_t::render()
 {
     gle::default_engine()->disable(gle::ES_depth_test);
-    tex_draw_.draw_tex(rastr_.tex_dist_col());
+    tex_draw_.draw_tex(rastr_.tex_rastr(), rastr_.tex_data());
     gle::default_engine()->enable(gle::ES_depth_test);
 }
 
