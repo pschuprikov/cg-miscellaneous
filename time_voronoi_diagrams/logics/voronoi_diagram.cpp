@@ -8,7 +8,7 @@ namespace tvd
 voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
     : main_(main)
     , proc_(NULL)
-    , rastr_(2000, 2000)
+    , rastr_(2048, 2048)
     , jfa_(1, 0.1)
 {}
 

@@ -78,14 +78,15 @@ void jump_flood_t::process(gle::texture_ptr tex)
         ;
 
     int const group_size = 16;
+    int const dimx = (tex->width() + group_size - 1) / group_size;
+    int const dimy = (tex->height() + group_size - 1) / group_size;
     for (; step > 0; step >>= 1)
     {
         impl_->jump_step->set(step);
 
-        gle::default_engine()->dispatch_compute((tex->width() + group_size - 1) / group_size,
-            (tex->height() + group_size - 1) / group_size, 1);
+        gle::default_engine()->dispatch_compute(dimx, dimy, 1);
     }
-    gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
+    gle::default_engine()->dispatch_compute(dimx, dimy, 1);
 
     gle::default_engine()->programs()->reset_program_in_use();
     gle::default_engine()->textures()->release_image_binding(bin);
