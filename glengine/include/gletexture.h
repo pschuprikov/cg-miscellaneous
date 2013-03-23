@@ -83,6 +83,8 @@ struct i_texture
 
     virtual void image_1d(int level, int internal_format, int width, int border,
                           GLenum format, GLenum type, const void * data) = 0;
+
+    virtual void get_image(int level, GLenum format, GLenum type, void * data) const = 0;
 };
 typedef boost::shared_ptr<i_texture> texture_ptr;
 

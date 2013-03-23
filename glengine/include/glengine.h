@@ -46,7 +46,8 @@ namespace gle
 
     enum engine_state_bit_t { ES_depth_test = 1,
                               ES_blend = 1 << 1,
-                              ES_line_smooth = 1 << 2 };
+                              ES_line_smooth = 1 << 2,
+                              ES_point_smooth = 1 << 3 };
 
     inline engine_state_bit_t operator|(engine_state_bit_t lhs, engine_state_bit_t rhs)
     {
@@ -70,6 +71,7 @@ namespace gle
         case ES_depth_test : return GL_DEPTH_TEST;
         case ES_blend : return GL_BLEND;
         case ES_line_smooth : return GL_LINE_SMOOTH;
+        case ES_point_smooth : return GL_POINT_SMOOTH;
         default : return 0;
         }
     }
@@ -121,6 +123,8 @@ namespace gle
         // rasterization
         virtual float line_width() const = 0;
         virtual void set_line_width(float width) = 0;
+        virtual float point_size() const = 0;
+        virtual void set_point_size(float size) = 0;
 
         virtual ~i_engine() {}
     };

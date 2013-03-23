@@ -35,6 +35,8 @@ public:
     void image_1d(int level, int internal_format, int width, int border,
                           GLenum format, GLenum type, const void * data);
 
+    void get_image(int level, GLenum format, GLenum type, void *data) const;
+
 private:
     GLuint id_;
 

@@ -63,4 +63,24 @@ void default_uniform_t::set(glm::mat2 m)
                               1, false, glm::value_ptr(m));
 }
 
+void default_uniform_t::set(unsigned int x)
+{
+    glProgramUniform1ui(pid_, data_.location(), x);
+}
+
+void default_uniform_t::set(glm::uvec2 xy)
+{
+    glProgramUniform2uiv(pid_, data_.location(), 1, glm::value_ptr(xy));
+}
+
+void default_uniform_t::set(glm::uvec3 xyz)
+{
+    glProgramUniform3uiv(pid_, data_.location(), 1, glm::value_ptr(xyz));
+}
+
+void default_uniform_t::set(glm::uvec4 xyzw)
+{
+    glProgramUniform3uiv(pid_, data_.location(), 1, glm::value_ptr(xyzw));
+}
+
 }

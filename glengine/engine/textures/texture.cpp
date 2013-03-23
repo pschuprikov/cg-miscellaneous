@@ -34,6 +34,11 @@ void texture_t::image_2d(int level, int internal_format, int width, int height, 
     glTextureImage2DEXT(id_, target_, level, internal_format, width, height, border, format, type, data);
 }
 
+void texture_t::get_image(int level, GLenum format, GLenum type, void * data) const
+{
+    glGetTextureImageEXT(id_, target_, level, format, type, data);
+}
+
 void texture_t::image_1d(int level, int internal_format, int width, int border,
                       GLenum format, GLenum type, const void * data)
 {

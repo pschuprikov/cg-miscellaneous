@@ -62,6 +62,8 @@ namespace gle
         // rasterization
         float line_width() const;
         void set_line_width(float width);
+        float point_size() const;
+        void set_point_size(float size);
 
     private:
         query_object_manager_t query_manager_;
@@ -76,6 +78,7 @@ namespace gle
 
         engine_state_bit_t state_;
         float line_width_;
+        float point_size_;
     };
 }
 

@@ -70,23 +70,27 @@ void engine_t::draw_elements(drawing_mode_t mode, int count, GLenum type, const 
 
 void engine_t::enable(engine_state_bit_t bits)
 {
-    if (bits & ES_depth_test)
+    if ((bits & ES_depth_test) && !(state_ & ES_depth_test))
         glEnable(gl_state(ES_depth_test));
-    if (bits & ES_blend)
+    if ((bits & ES_blend) && !(state_ & ES_blend))
         glEnable(gl_state(ES_blend));
-    if (bits & ES_line_smooth)
+    if ((bits & ES_line_smooth) && !(state_ & ES_line_smooth))
         glEnable(gl_state(ES_line_smooth));
+    if ((bits & ES_point_smooth) && !(state_ & ES_point_smooth))
+        glEnable(gl_state(ES_point_smooth));
     state_ = state_ | bits;
 }
 
 void engine_t::disable(engine_state_bit_t bits)
 {
-    if (bits & ES_depth_test)
+    if ((bits & ES_depth_test) && (state_ & ES_depth_test))
         glDisable(gl_state(ES_depth_test));
-    if (bits & ES_blend)
-        glDisable(gl_state(ES_blend));
-    if (bits & ES_line_smooth)
-        glDisable(gl_state(ES_line_smooth));
+    if ((bits & ES_blend) && (state_ & ES_blend))
+        glDisable(gl_state(ES_blend) && (state_ & ES_blend));
+    if ((bits & ES_line_smooth) && (state_ & ES_line_smooth))
+        glDisable(gl_state(ES_line_smooth) && (state_ & ES_line_smooth));
+    if ((bits & ES_point_smooth) && (state_ & ES_point_smooth))
+        glDisable(gl_state(ES_point_smooth));
     state_ = state_ & ~bits;
 }
 
@@ -118,6 +122,17 @@ void engine_t::set_line_width(float width)
 {
     line_width_ = width;
     glLineWidth(line_width_);
+}
+
+float engine_t::point_size() const
+{
+    return point_size_;
+}
+
+void engine_t::set_point_size(float size)
+{
+    point_size_ = size;
+    glPointSize(size);
 }
 
 }

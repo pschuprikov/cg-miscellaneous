@@ -27,6 +27,11 @@ struct default_uniform_t
     void set(glm::ivec3 xyz);
     void set(glm::ivec4 xyzw);
 
+    void set(unsigned int x);
+    void set(glm::uvec2 xy);
+    void set(glm::uvec3 xyz);
+    void set(glm::uvec4 xyzw);
+
     void set(glm::mat4 m);
     void set(glm::mat3 m);
     void set(glm::mat2 m);

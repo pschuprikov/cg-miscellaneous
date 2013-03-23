@@ -10,7 +10,8 @@ namespace gle
 enum drawing_mode_t { DM_triangles = GL_TRIANGLES,
                       DM_lines = GL_LINES,
                       DM_line_strip = GL_LINE_STRIP,
-                      DM_triangle_strip = GL_TRIANGLE_STRIP
+                      DM_triangle_strip = GL_TRIANGLE_STRIP,
+                      DM_points = GL_POINTS
                     };
 
 struct i_vertex_array_manager
