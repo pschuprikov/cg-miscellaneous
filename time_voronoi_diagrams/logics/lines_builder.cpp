@@ -23,6 +23,7 @@ void lines_builder_t::render()
     gle::default_engine()->disable(gle::ES_depth_test);
     for (size_t i = 0; i < lines_.size(); i++)
         render_->render_line(lines_[i]);
+    gle::default_engine()->disable(gle::ES_line_smooth);
     gle::default_engine()->enable(gle::ES_depth_test);
 }
 

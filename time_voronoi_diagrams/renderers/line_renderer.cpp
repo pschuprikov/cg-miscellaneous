@@ -31,17 +31,24 @@ line_renderer_t::line_renderer_t()
 void line_renderer_t::render_line(const line_data_t &data)
 {
     prg_->var("color")->set(data.color());
+    gle::default_engine()->enable(gle::ES_line_smooth);
+    gle::default_engine()->enable(gle::ES_point_smooth);
+    gle::default_engine()->set_line_width(5.0);
+    gle::default_engine()->set_point_size(10.0);
 
-    vao_->bind_buffer(pos_binding_, data.vtx_data(), 0, sizeof(line_vertex_t));    
+    vao_->bind_buffer(pos_binding_, data.vtx_data(), 0, sizeof(line_vertex_t));
     gle::default_engine()->programs()->use(prg_);
     gle::default_engine()->vaos()->set_current(vao_);
 
-    glLineWidth(5.0);
-    gle::default_engine()->draw_arrays(gle::DM_line_strip, 0, data.count());
+    gle::default_engine()->draw_arrays(gle::DM_line_strip, 0, data.count());;
+    gle::default_engine()->draw_arrays(gle::DM_points, 0, 1);
 
     gle::default_engine()->programs()->reset_program_in_use();
     gle::default_engine()->vaos()->reset_current();
     vao_->unbind_buffer(pos_binding_);
+
+    gle::default_engine()->disable(gle::ES_line_smooth);
+    gle::default_engine()->disable(gle::ES_point_smooth);
 }
 
 }

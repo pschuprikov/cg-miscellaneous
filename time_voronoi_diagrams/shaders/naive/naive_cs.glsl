@@ -17,11 +17,21 @@ uniform int jump_step;
 
 uniform layout(rgba32ui) uimage2D img_vd;
 
+uniform samplerBuffer tex_line;
+
+uniform vec3 color;
+
 void unpack_params(inout uvec4 texel, out vec4 segment, out float prefix_dist)
 {
     prefix_dist = unpackHalf2x16(texel.w)[1];
     segment.xy = unpackUnorm2x16(texel.x);
     segment.zw = unpackUnorm2x16(texel.y);
+}
+
+uvec4 pack_params(in const vec2 fst, in const vec2 snd, in const float prefix_dist)
+{
+    return uvec4(packUnorm2x16(fst), packUnorm2x16(snd),
+                 packHalf2x16(color.xy), packHalf2x16(vec2(color.z, prefix_dist)));
 }
 
 float cross_2d(const in vec2 v1, const in vec2 v2)
@@ -84,23 +94,28 @@ void check_best(inout float min_dist, inout uvec4 best, in const uvec4 cur, in c
 
 void main(void)
 {
-    float min_dist = max_distance * 2;
-
     vec4 seg;
     float prefix_dist;
 
     uvec4 best = uvec4(0);
-    uvec4 cur;
 
-    for (int i = -1; i <= 1; i++)
+    float min_dist = max_distance * 2;
+
+    uvec4 me = imageLoad(img_vd, my_coord);
+    if ((me.x | me.y | me.z | me.w) != 0)
     {
-        for (int j = -1; j <= 1; j++)
-        {
-            cur = imageLoad(img_vd, my_coord + ivec2(i, j) * jump_step);
-            unpack_params(cur, seg, prefix_dist);
-            if ((cur.x | cur.y | cur.z | cur.w) != 0)
-                check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist));
-        }
+        unpack_params(me, seg, prefix_dist);
+        check_best(min_dist, best, me, calc_optimal(seg, prefix_dist));
+    }
+
+    vec3 prev;
+    vec3 cur = texelFetch(tex_line, 0).rgb;
+    for (int i = 1; i < textureSize(tex_line); i++)
+    {
+        prev = cur;
+        cur = texelFetch(tex_line, i).rgb;
+        check_best(min_dist, best, pack_params(prev.xy, cur.xy, prev.z),
+                   calc_optimal(vec4(prev.xy, cur.xy), prev.z));
     }
 
     imageStore(img_vd, my_coord, best);

@@ -22,7 +22,10 @@ SOURCES += main.cpp \
     logics/gpgpu_vd/rasterizer.cpp \
     logics/gpgpu_vd/voronoi_texdraw.cpp \
     logics/gpgpu_vd/jump_flood.cpp \
-    logics/lines_loader.cpp
+    logics/lines_loader.cpp \
+    renderers/primitive_renderer.cpp \
+    logics/gpgpu_vd/cleaner.cpp \
+    logics/gpgpu_vd/naive.cpp
 
 PRECOMPILED_HEADER = stdafx.h
 
@@ -54,7 +57,10 @@ HEADERS += \
     logics/gpgpu_vd/voronoi_texdraw.h \
     logics/gpgpu_vd/jump_flood.h \
     logics/lines_loader.h \
-    lines_common.h
+    lines_common.h \
+    logics/gpgpu_vd/naive.h \
+    renderers/primitive_renderer.h \
+    logics/gpgpu_vd/cleaner.h
 
 LINES_DATA_FILE = lines.dat
 
@@ -66,7 +72,9 @@ SHADER_FILES = \
     shaders/rasterizer/rasterizer_gs.glsl \
     shaders/rasterizer/rasterizer_vs.glsl \
     shaders/texdraw/texdraw_fs.glsl \
-    shaders/texdraw/texdraw_vs.glsl
+    shaders/texdraw/texdraw_vs.glsl \
+    shaders/naive/naive_cs.glsl \
+    shaders/cleaner/cleaner_cs.glsl
 
 OTHER_FILES += $$SHADER_FILES $$LINES_DATA_FILE
 

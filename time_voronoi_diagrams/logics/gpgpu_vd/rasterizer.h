@@ -2,6 +2,7 @@
 #define RASTERIZER_H
 
 #include "lines_prepare.h"
+#include "cleaner.h"
 
 namespace tvd
 {
@@ -12,7 +13,6 @@ struct rasterizer_t
     ~rasterizer_t();
 
     template<class Iter>
-
     void rasterize(Iter beg, Iter end)
     {
         begin_rasterization();
@@ -42,6 +42,7 @@ private:
 
 private:
     gle::viewport_t old_vp_;
+    cleaner_t cleaner_;
 
     boost::scoped_ptr<impl_t> impl_;
 };

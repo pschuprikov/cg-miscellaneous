@@ -11,7 +11,7 @@ struct jump_flood_t::impl_t
     gle::shader_variable_ptr outer_params;
     gle::shader_variable_ptr jump_step;
 
-    gle::shader_variable_ptr img_vd_in;
+    gle::shader_variable_ptr img_vd;
 
     impl_t()
     {
@@ -25,7 +25,7 @@ private:
         outer_params = prg->var("outer_params");
         jump_step = prg->var("jump_step");
 
-        img_vd_in = prg->var("img_vd_in");
+        img_vd = prg->var("img_vd");
     }
 
     void load_program()
@@ -61,7 +61,7 @@ void jump_flood_t::process(gle::texture_ptr tex)
     gle::image_binding_t bin = gle::default_engine()->textures()->reserve_image_binding();
     gle::default_engine()->textures()->bind_image(bin, tex_in, 0, gle::ITA_read_write, GL_RGBA32UI);
 
-    impl_->img_vd_in->set(bin);
+    impl_->img_vd->set(bin);
     impl_->max_distance->set(max_distance_);
 
     double const sin_alpha = outer_velocity_;
@@ -80,13 +80,19 @@ void jump_flood_t::process(gle::texture_ptr tex)
     int const group_size = 16;
     int const dimx = (tex->width() + group_size - 1) / group_size;
     int const dimy = (tex->height() + group_size - 1) / group_size;
+
+    gle::time_elapsed_query_ptr teq = gle::default_engine()->queries()->create_time_elapsed_query();
+    teq->begin_query();
+
     for (; step > 0; step >>= 1)
     {
         impl_->jump_step->set(step);
-
         gle::default_engine()->dispatch_compute(dimx, dimy, 1);
     }
     gle::default_engine()->dispatch_compute(dimx, dimy, 1);
+
+    teq->end_query();
+    std::cerr << "jump_flood_time: " << (teq->time_elapsed_ns() * 1.e-6) << "ms\n";
 
     gle::default_engine()->programs()->reset_program_in_use();
     gle::default_engine()->textures()->release_image_binding(bin);

@@ -71,7 +71,6 @@ voronoi_texdraw_t::voronoi_texdraw_t()
     : impl_(new impl_t())
 {}
 
-
 voronoi_texdraw_t::~voronoi_texdraw_t() {}
 
 void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex)

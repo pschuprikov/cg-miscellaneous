@@ -114,12 +114,12 @@ void rasterizer_t::begin_rasterization()
     old_vp_ = gle::default_engine()->viewport();
     gle::default_engine()->set_viewport(gle::viewport_t(0, 0, tex()->width(), tex()->height()));
 
+    cleaner_.clean_tex(tex(), glm::uvec4(0, 0, 0, 0));
+
     gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->fbos()->set_draw_framebuffer(impl_->fbo);
     gle::default_engine()->programs()->use(impl_->prg);
 
-    gle::default_engine()->clear_color(glm::vec4(0, 0, 0, 0));
-    gle::default_engine()->clear(gle::BPB_color);
 
     gle::default_engine()->disable(gle::ES_depth_test);
 }

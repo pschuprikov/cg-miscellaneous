@@ -11,6 +11,7 @@
 #include "gpgpu_vd/rasterizer.h"
 #include "gpgpu_vd/voronoi_texdraw.h"
 #include "gpgpu_vd/jump_flood.h"
+#include "gpgpu_vd/naive.h"
 
 namespace tvd
 {
@@ -44,9 +45,11 @@ private:
     void decrease_outer_velocity(bool presice = false);
 
     void run_jfa();
+    void run_naive();
 
 private:
     boost::scoped_ptr<lines_data_t> data_;
+    std::vector<newline_data_t> newlines_data_;
 
     main_logic_t *      main_;
     i_logic_processor * proc_;
@@ -55,6 +58,9 @@ private:
     rasterizer_t         rastr_;
     voronoi_texdraw_t tex_draw_;
     jump_flood_t           jfa_;
+    naive_t              naive_;
+
+    bool use_naive_;
 };
 typedef boost::shared_ptr<voronoi_diagram_t> voronoi_diagram_ptr;
 
