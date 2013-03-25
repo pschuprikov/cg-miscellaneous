@@ -10,10 +10,10 @@ struct cleaner_t
 {
     cleaner_t();
 
-    void clean_tex(gle::texture_ptr tex, glm::uvec4 color);
+    void clean_tex(gle::texture_ptr tex, unsigned int value);
 private:
     gle::program_ptr prg_;
-    gle::shader_variable_ptr clear_color_;
+    gle::shader_variable_ptr clear_value_;
     gle::shader_variable_ptr img_clear_;
 };
 

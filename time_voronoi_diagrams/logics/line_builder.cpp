@@ -7,7 +7,7 @@ namespace tvd
 void line_builder_t::reset()
 {
     cpu_line_data_.clear();
-    line_data_.reset(new line_data_t(glm::vec3(rand() / (float) RAND_MAX, rand() / (float) RAND_MAX,
+    line_data_.reset(new line_data_t(glm::vec3(0.5f + rand() / 2 / (float) RAND_MAX, rand() / (float) RAND_MAX,
                                                rand() / (float) RAND_MAX)));
 }
 

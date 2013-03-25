@@ -1,18 +1,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "voronoi_texdraw.h"
+#include "renderers/drawing_utils.h"
 
 namespace tvd
 {
 
 struct voronoi_texdraw_t::impl_t
 {
-    gle::vertex_array_ptr vao;
     gle::program_ptr prg;
 
     gle::shader_variable_ptr img_vd;
+    gle::shader_variable_ptr img_vd_data;
 
-    int count;
+    gle::vertex_array_ptr vao;
+    unsigned int count;
 
     impl_t()
     {
@@ -41,6 +43,7 @@ private:
             std::cerr << exc.name() << "\n" << exc.reason() << "\n";
         }
         img_vd = prg->var("img_vd");
+        img_vd_data = prg->var("img_vd_data");
         glm::mat4 mvp = glm::ortho<float>(0, 1, 0, 1, -1, 1);
         prg->var("mvp")->set(mvp);
     }
@@ -73,21 +76,27 @@ voronoi_texdraw_t::voronoi_texdraw_t()
 
 voronoi_texdraw_t::~voronoi_texdraw_t() {}
 
-void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex)
+void voronoi_texdraw_t::draw_tex(gle::texture_ptr tex, gle::texture_ptr tex_data)
 {
     gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->programs()->use(impl_->prg);
 
     gle::image_binding_t img_binding = gle::default_engine()->textures()->reserve_image_binding();
-    gle::default_engine()->textures()->bind_image(img_binding, tex, 0, gle::ITA_read_only, GL_RGBA32UI);
+    gle::default_engine()->textures()->bind_image(img_binding, tex, 0,
+        gle::ITA_read_only, tex->internal_format());
+
+    gle::image_binding_t img_binding_data = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(img_binding_data, tex_data,
+        0, gle::ITA_read_write, tex_data->internal_format());
 
     impl_->img_vd->set(img_binding);
+    impl_->img_vd_data->set(img_binding_data);
 
     gle::default_engine()->draw_arrays(gle::DM_triangle_strip, 0, impl_->count);
 
     gle::default_engine()->textures()->release_image_binding(img_binding);
+    gle::default_engine()->textures()->release_image_binding(img_binding_data);
 
-    gle::default_engine()->vaos()->reset_current();
     gle::default_engine()->programs()->reset_program_in_use();
 }
 

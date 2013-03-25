@@ -12,6 +12,7 @@ struct jump_flood_t::impl_t
     gle::shader_variable_ptr jump_step;
 
     gle::shader_variable_ptr img_vd;
+    gle::shader_variable_ptr img_lines_data;
 
     impl_t()
     {
@@ -26,6 +27,7 @@ private:
         jump_step = prg->var("jump_step");
 
         img_vd = prg->var("img_vd");
+        img_lines_data = prg->var("img_lines_data");
     }
 
     void load_program()
@@ -54,14 +56,17 @@ jump_flood_t::jump_flood_t(float max_distance, float outer_velocity)
 
 jump_flood_t::~jump_flood_t() {}
 
-void jump_flood_t::process(gle::texture_ptr tex)
+void jump_flood_t::process(gle::texture_ptr tex_rastr, gle::texture_ptr tex_lines_data)
 {
-    gle::texture_ptr tex_in = tex;
+    gle::image_binding_t bin_rastr = gle::default_engine()->textures()->reserve_image_binding();
+    gle::image_binding_t bin_data = gle::default_engine()->textures()->reserve_image_binding();
+    gle::default_engine()->textures()->bind_image(bin_rastr, tex_rastr, 0,
+        gle::ITA_read_write, tex_rastr->internal_format());
+    gle::default_engine()->textures()->bind_image(bin_data, tex_lines_data, 0,
+        gle::ITA_read_only, tex_lines_data->internal_format());
 
-    gle::image_binding_t bin = gle::default_engine()->textures()->reserve_image_binding();
-    gle::default_engine()->textures()->bind_image(bin, tex_in, 0, gle::ITA_read_write, GL_RGBA32UI);
-
-    impl_->img_vd->set(bin);
+    impl_->img_vd->set(bin_rastr);
+    impl_->img_lines_data->set(bin_data);
     impl_->max_distance->set(max_distance_);
 
     double const sin_alpha = outer_velocity_;
@@ -71,15 +76,15 @@ void jump_flood_t::process(gle::texture_ptr tex)
 
     gle::default_engine()->programs()->use(impl_->prg);
 
-    int const max_dim = std::max(tex->width(), tex->height());
+    int const max_dim = std::max(tex_rastr->width(), tex_rastr->height());
 
     int step;
     for (step = 1; step << 1 < max_dim; step <<= 1)
         ;
 
     int const group_size = 16;
-    int const dimx = (tex->width() + group_size - 1) / group_size;
-    int const dimy = (tex->height() + group_size - 1) / group_size;
+    int const dimx = (tex_rastr->width() + group_size - 1) / group_size;
+    int const dimy = (tex_rastr->height() + group_size - 1) / group_size;
 
     gle::time_elapsed_query_ptr teq = gle::default_engine()->queries()->create_time_elapsed_query();
     teq->begin_query();
@@ -95,7 +100,8 @@ void jump_flood_t::process(gle::texture_ptr tex)
     std::cerr << "jump_flood_time: " << (teq->time_elapsed_ns() * 1.e-6) << "ms\n";
 
     gle::default_engine()->programs()->reset_program_in_use();
-    gle::default_engine()->textures()->release_image_binding(bin);
+    gle::default_engine()->textures()->release_image_binding(bin_rastr);
+    gle::default_engine()->textures()->release_image_binding(bin_data);
 }
 
 }

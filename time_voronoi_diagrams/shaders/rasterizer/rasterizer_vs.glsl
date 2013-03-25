@@ -7,10 +7,12 @@ out vs_output
 {
     vec2 pos;
     float dist;
+    int idx;
 } v_out;
 
 void main(void)
 {
     v_out.pos = in_pos;
+    v_out.idx = gl_VertexID;
     v_out.dist = in_dist;
 }

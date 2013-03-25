@@ -86,9 +86,9 @@ void engine_t::disable(engine_state_bit_t bits)
     if ((bits & ES_depth_test) && (state_ & ES_depth_test))
         glDisable(gl_state(ES_depth_test));
     if ((bits & ES_blend) && (state_ & ES_blend))
-        glDisable(gl_state(ES_blend) && (state_ & ES_blend));
+        glDisable(gl_state(ES_blend));
     if ((bits & ES_line_smooth) && (state_ & ES_line_smooth))
-        glDisable(gl_state(ES_line_smooth) && (state_ & ES_line_smooth));
+        glDisable(gl_state(ES_line_smooth));
     if ((bits & ES_point_smooth) && (state_ & ES_point_smooth))
         glDisable(gl_state(ES_point_smooth));
     state_ = state_ & ~bits;

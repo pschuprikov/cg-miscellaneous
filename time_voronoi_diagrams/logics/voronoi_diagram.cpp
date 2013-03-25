@@ -7,8 +7,8 @@ namespace tvd
 
 namespace
 {
-const int g_width  = 512;
-const int g_height = 512;
+const int g_width  = 8192;
+const int g_height = 8192;
 }
 
 voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
@@ -17,7 +17,8 @@ voronoi_diagram_t::voronoi_diagram_t(main_logic_t *main)
     , rastr_(g_width, g_height)
     , jfa_(0.2, 0.01)
     , use_naive_(false)
-{}
+{
+}
 
 void voronoi_diagram_t::treat(i_io_provider * io)
 {
@@ -72,7 +73,9 @@ void voronoi_diagram_t::run_jfa()
 {
     rastr_.blit_tex();
 
-    jfa_.process(rastr_.tex());
+    jfa_.process(rastr_.tex_rastr(), rastr_.tex_data());
+
+    gle::default_engine()->memory_barrier(gle::MBB_texture_fetch);
 
     invalidate();
 }
@@ -81,8 +84,8 @@ void voronoi_diagram_t::run_naive()
 {
     rastr_.blit_tex();
 
-    naive_.process(newlines_data_.begin(), newlines_data_.end(),
-                   rastr_.tex(), jfa_.max_distance(), jfa_.outer_velocity());
+    naive_.process(rastr_.tex_rastr(), rastr_.tex_data(), jfa_.max_distance(),
+        jfa_.outer_velocity(), rastr_.num_segments());
 
     invalidate();
 }
@@ -90,7 +93,7 @@ void voronoi_diagram_t::run_naive()
 void voronoi_diagram_t::render()
 {
     gle::default_engine()->disable(gle::ES_depth_test);
-    tex_draw_.draw_tex(rastr_.tex());
+    tex_draw_.draw_tex(rastr_.tex_rastr(), rastr_.tex_data());
     gle::default_engine()->enable(gle::ES_depth_test);
 }
 
@@ -103,6 +106,7 @@ void voronoi_diagram_t::process()
                        boost::bind(&lines_prepare_t::prepare, lines_prep_, _1));
 
         rastr_.rasterize(newlines_data_.begin(), newlines_data_.end());
+
         if (use_naive_)
             run_naive();
         else

@@ -40,6 +40,10 @@ void lines_builder_t::key_pressed(const i_keyboard_input_info * ev)
         main_->voronoi()->process();
         proc_->set_next_logic(main_->voronoi());
     }
+    else if (ev->key_pressed() == 'c')
+    {
+        reset();
+    }
 }
 
 }

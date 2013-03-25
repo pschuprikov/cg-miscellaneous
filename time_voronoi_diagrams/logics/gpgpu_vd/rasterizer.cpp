@@ -1,4 +1,5 @@
 #include "rasterizer.h"
+#include "renderers/drawing_utils.h"
 
 namespace tvd
 {
@@ -6,22 +7,31 @@ namespace tvd
 struct rasterizer_t::impl_t
 {
     gle::vertex_attrib_binding_t vtx_binding;
-    int out_location;
-    int tmp_location;
 
     gle::program_ptr prg;
+
     gle::vertex_array_ptr vao;
     gle::framebuffer_ptr fbo;
 
+    gle::texture_ptr lines_data;
+
+    int out_location;
+    int tmp_location;
 
     impl_t(int width, int height)
     {
         load_program();
+
+        lines_data = gle::default_engine()->textures()->create_texture(gle::TT_1d);
+        lines_data->set_mag_filter(gle::TMAGF_nearest);
+        lines_data->set_min_filter(gle::TMINF_nearest);
+
         setup_vao();
         setup_fbo(width, height);
     }
 
 private:
+
     void load_program()
     {
         prg = gle::default_engine()->programs()->create_program("rasterizer");
@@ -66,19 +76,18 @@ private:
         gle::texture_ptr tex0 = gle::default_engine()->textures()->create_texture(gle::TT_2d);
         tex0->set_mag_filter(gle::TMAGF_nearest);
         tex0->set_min_filter(gle::TMINF_nearest);
-        tex0->image_2d(0, GL_RGBA32UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, NULL);
+        tex0->image_2d(0, GL_R16UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
         gle::texture_ptr tex_tmp = gle::default_engine()->textures()->create_texture(gle::TT_2d);
         tex_tmp->set_mag_filter(gle::TMAGF_nearest);
         tex_tmp->set_min_filter(gle::TMINF_nearest);
-        tex_tmp->image_2d(0, GL_RGBA32UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, NULL);
+        tex_tmp->image_2d(0, GL_R16UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
         out_location = 0;
         tmp_location = 1;
 
         fbo->color_attachment(out_location)->attach_texture(tex0, 0);
         fbo->color_attachment(tmp_location)->attach_texture(tex_tmp, 0);
-
 
         std::vector<int> buffers(1);
 
@@ -109,24 +118,35 @@ rasterizer_t::rasterizer_t(int width, int height)
 rasterizer_t::~rasterizer_t() {}
 
 
-void rasterizer_t::begin_rasterization()
+void rasterizer_t::begin_rasterization(size_t num_segments, gle::image_binding_t binding)
 {
+    unsigned int pow2 = 1;
+    while (num_segments > pow2) pow2 <<= 1;
+
+    impl_->lines_data->image_1d(0, GL_RGBA32UI, pow2, 0,
+        GL_RGBA_INTEGER, GL_UNSIGNED_INT, NULL);
+
+    impl_->prg->var("img_lines_data")->set(binding);
+    gle::default_engine()->textures()->bind_image(binding, impl_->lines_data, 0, gle::ITA_write_only, GL_RGBA32UI);
+
     old_vp_ = gle::default_engine()->viewport();
-    gle::default_engine()->set_viewport(gle::viewport_t(0, 0, tex()->width(), tex()->height()));
+    gle::default_engine()->set_viewport(
+                gle::viewport_t(0, 0, tex_rastr()->width(), tex_rastr()->height()));
 
-    cleaner_.clean_tex(tex(), glm::uvec4(0, 0, 0, 0));
+    cleaner_.clean_tex(tex_rastr(), 0xffff);
 
-    gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->fbos()->set_draw_framebuffer(impl_->fbo);
+    gle::default_engine()->vaos()->set_current(impl_->vao);
     gle::default_engine()->programs()->use(impl_->prg);
 
-
     gle::default_engine()->disable(gle::ES_depth_test);
+
 }
 
-void rasterizer_t::rasterize(newline_data_t const& line)
+void rasterizer_t::rasterize(newline_data_t const& line, int offset)
 {
     impl_->prg->var("color")->set(line.color());
+    impl_->prg->var("offset")->set(offset);
     impl_->vao->bind_buffer(impl_->vtx_binding, line.segments(), 0, sizeof(newline_vertex_t));
 
     gle::default_engine()->draw_arrays(gle::DM_line_strip, 0, line.count());
@@ -140,8 +160,8 @@ void rasterizer_t::end_rasterization()
 
     gle::default_engine()->programs()->reset_program_in_use();
     gle::default_engine()->vaos()->reset_current();
-
     gle::default_engine()->fbos()->set_draw_framebuffer_default();
+
     impl_->swap_buffers();
 
     blit_tex();
@@ -154,8 +174,8 @@ void rasterizer_t::blit_tex()
     gle::default_engine()->fbos()->set_draw_framebuffer(impl_->fbo);
     gle::default_engine()->fbos()->set_read_framebuffer(impl_->fbo);
 
-    int width = tex()->width();
-    int height = tex()->height();
+    int width = tex_rastr()->width();
+    int height = tex_rastr()->height();
 
     gle::default_engine()->blit_framebuffer(0, 0, width, height, 0, 0, width, height,
                                             gle::BPB_color, gle::FF_nearest);
@@ -163,9 +183,14 @@ void rasterizer_t::blit_tex()
     gle::default_engine()->fbos()->set_read_framebuffer_default();
 }
 
-gle::texture_ptr rasterizer_t::tex() const
+gle::texture_ptr rasterizer_t::tex_rastr() const
 {
     return impl_->fbo->color_attachment(impl_->out_location)->texture();
+}
+
+gle::texture_ptr rasterizer_t::tex_data() const
+{
+    return impl_->lines_data;
 }
 
 }

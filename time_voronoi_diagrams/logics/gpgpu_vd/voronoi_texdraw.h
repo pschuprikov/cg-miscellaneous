@@ -11,7 +11,7 @@ struct voronoi_texdraw_t
     voronoi_texdraw_t();
     ~voronoi_texdraw_t();
 
-    void draw_tex(gle::texture_ptr tex);
+    void draw_tex(gle::texture_ptr tex, gle::texture_ptr data_tex);
 
 private:
     struct impl_t;

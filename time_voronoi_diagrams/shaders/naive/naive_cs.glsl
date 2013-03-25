@@ -15,23 +15,19 @@ uniform float max_distance;
 
 uniform int jump_step;
 
-uniform layout(rgba32ui) uimage2D img_vd;
+uniform layout(r16ui) uimage2D img_vd;
+uniform layout(rgba32ui) uimage1D img_lines_data;
 
-uniform samplerBuffer tex_line;
+uniform uint num_segments;
 
 uniform vec3 color;
 
-void unpack_params(inout uvec4 texel, out vec4 segment, out float prefix_dist)
+
+void unpack_seg(in uvec4 texel, out vec4 segment, out float max_dist)
 {
-    prefix_dist = unpackHalf2x16(texel.w)[1];
     segment.xy = unpackUnorm2x16(texel.x);
     segment.zw = unpackUnorm2x16(texel.y);
-}
-
-uvec4 pack_params(in const vec2 fst, in const vec2 snd, in const float prefix_dist)
-{
-    return uvec4(packUnorm2x16(fst), packUnorm2x16(snd),
-                 packHalf2x16(color.xy), packHalf2x16(vec2(color.z, prefix_dist)));
+    max_dist = unpackHalf2x16(texel.z)[0];
 }
 
 float cross_2d(const in vec2 v1, const in vec2 v2)
@@ -83,7 +79,7 @@ float calc_optimal(in const vec4 seg, in const float prefix_dist)
    return sqrt(cur_dist_sqr) + prefix_dist;
 }
 
-void check_best(inout float min_dist, inout uvec4 best, in const uvec4 cur, in const float cur_dist)
+void check_best(inout float min_dist, inout uint best, in const uint cur, in const float cur_dist)
 {
     if (cur_dist < min_dist && cur_dist < max_distance)
     {
@@ -97,26 +93,16 @@ void main(void)
     vec4 seg;
     float prefix_dist;
 
-    uvec4 best = uvec4(0);
+    uint best = 0xffff;
 
     float min_dist = max_distance * 2;
 
-    uvec4 me = imageLoad(img_vd, my_coord);
-    if ((me.x | me.y | me.z | me.w) != 0)
+    for (uint i = 0; i < num_segments; i++)
     {
-        unpack_params(me, seg, prefix_dist);
-        check_best(min_dist, best, me, calc_optimal(seg, prefix_dist));
+        uvec4 texel = imageLoad(img_lines_data, int(i));
+        unpack_seg(texel, seg, prefix_dist);
+        check_best(min_dist, best, i, calc_optimal(seg, prefix_dist));
     }
 
-    vec3 prev;
-    vec3 cur = texelFetch(tex_line, 0).rgb;
-    for (int i = 1; i < textureSize(tex_line); i++)
-    {
-        prev = cur;
-        cur = texelFetch(tex_line, i).rgb;
-        check_best(min_dist, best, pack_params(prev.xy, cur.xy, prev.z),
-                   calc_optimal(vec4(prev.xy, cur.xy), prev.z));
-    }
-
-    imageStore(img_vd, my_coord, best);
+    imageStore(img_vd, my_coord, uvec4(best));
 }

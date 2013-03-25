@@ -16,13 +16,13 @@ cleaner_t::cleaner_t()
     {
         std::cerr << ex.what() << "\n" << ex.reason() << "\n";
     }
-    clear_color_ = prg_->var("clear_color");
+    clear_value_ = prg_->var("clear_value");
     img_clear_ = prg_->var("img_clear");
 }
 
-void cleaner_t::clean_tex(gle::texture_ptr tex, glm::uvec4 color)
+void cleaner_t::clean_tex(gle::texture_ptr tex, unsigned int value)
 {
-    clear_color_->set(color);
+    clear_value_->set(value);
     gle::image_binding_t binding = gle::default_engine()->textures()->reserve_image_binding();
     img_clear_->set(binding);
 

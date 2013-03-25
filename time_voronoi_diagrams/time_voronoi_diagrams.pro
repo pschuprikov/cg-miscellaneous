@@ -5,7 +5,7 @@ CONFIG += console debug
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x
+QMAKE_CXXFLAGS = -Wno-reorder -std=c++0x -pg
 
 SOURCES += main.cpp \
     core/input_manager.cpp \

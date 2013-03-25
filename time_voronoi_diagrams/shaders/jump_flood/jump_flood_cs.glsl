@@ -15,13 +15,14 @@ uniform float max_distance;
 
 uniform int jump_step;
 
-uniform layout(rgba32ui) uimage2D img_vd;
+uniform layout(r16ui) uimage2D img_vd;
+uniform layout(rgba32ui) readonly uimage1D img_lines_data;
 
-void unpack_params(inout uvec4 texel, out vec4 segment, out float prefix_dist)
+void unpack_seg(in uvec4 texel, out vec4 segment, out float max_dist)
 {
-    prefix_dist = unpackHalf2x16(texel.w)[1];
     segment.xy = unpackUnorm2x16(texel.x);
     segment.zw = unpackUnorm2x16(texel.y);
+    max_dist = unpackHalf2x16(texel.z)[0];
 }
 
 float cross_2d(const in vec2 v1, const in vec2 v2)
@@ -73,7 +74,8 @@ float calc_optimal(in const vec4 seg, in const float prefix_dist)
    return sqrt(cur_dist_sqr) + prefix_dist;
 }
 
-void check_best(inout float min_dist, inout uvec4 best, in const uvec4 cur, in const float cur_dist)
+void check_best(inout float min_dist, inout uint best,
+                in const uint cur, in const float cur_dist)
 {
     if (cur_dist < min_dist && cur_dist < max_distance)
     {
@@ -86,22 +88,26 @@ void main(void)
 {
     float min_dist = max_distance * 2;
 
-    vec4 seg;
-    float prefix_dist;
-
-    uvec4 best = uvec4(0);
-    uvec4 cur;
+    uint best = 0xffff;
 
     for (int i = -1; i <= 1; i++)
     {
-        for (int j = -1; j <= 1; j++)
-        {
-            cur = imageLoad(img_vd, my_coord + ivec2(i, j) * jump_step);
-            unpack_params(cur, seg, prefix_dist);
-            if ((cur.x | cur.y | cur.z | cur.w) != 0)
-                check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist));
-        }
+       for (int j = -1; j <= 1; j++)
+       {
+          ivec2 coord = my_coord + ivec2(i, j) * jump_step;
+
+          uint cur = imageLoad(img_vd, clamp(coord, ivec2(0), max_idx)).r;
+
+          if (cur != 0xffff)
+          {
+              vec4 seg;
+              float prefix_dist;
+              uvec4 texel = imageLoad(img_lines_data, int(cur));
+              unpack_seg(texel, seg, prefix_dist);
+              check_best(min_dist, best, cur, calc_optimal(seg, prefix_dist));
+          }
+       }
     }
 
-    imageStore(img_vd, my_coord, best);
+    imageStore(img_vd, my_coord, uvec4(best));
 }
