@@ -20,7 +20,7 @@ void main(void)
         vec4 dist_color;
         dist_color.xy = unpackHalf2x16(packed_dist_color.x);
         dist_color.zw = unpackHalf2x16(packed_dist_color.y);
-        out_color = vec4(dist_color.yzw, 1);
+        out_color = vec4(0.5 * dist_color.yzw, 1);
     }
     else
         out_color = vec4(0);

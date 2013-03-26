@@ -27,6 +27,8 @@ struct voronoi_diagram_t
     void set_data(lines_data_t const& data) { data_.reset(new lines_data_t(data)); }
     void process();
 
+    double error_percent();
+
     // i_logic
 public:
     void treat(i_io_provider * io);

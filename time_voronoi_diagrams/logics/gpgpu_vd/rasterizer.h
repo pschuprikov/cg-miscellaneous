@@ -23,11 +23,11 @@ struct rasterizer_t
 
         num_segments_ = total_segments;
 
+
         begin_rasterization(total_segments, binding);
-        gle::samples_passed_query_ptr spq = gle::default_engine()->queries()->create_samples_passed_query();
-        gle::primitives_generated_query_ptr pg = gle::default_engine()->queries()->create_primitives_generated_query(0);
-        spq->begin_query();
-        pg->begin_query();
+
+        gle::time_elapsed_query_ptr teq = gle::default_engine()->queries()->create_time_elapsed_query();
+        teq->begin_query();
 
         int offset = 0;
         for (;beg != end; beg++)
@@ -36,11 +36,11 @@ struct rasterizer_t
             offset += beg->count() - 1;
         }
 
-        spq->end_query();
-        pg->end_query();
-        std::cerr << "rasterized:" << spq->samples_passed() << std::endl;
-        std::cerr << "primitives: " << pg->primitives_generated() << std::endl;
+        teq->end_query();
+        std::cerr << "rasteriazation_time: " << (teq->time_elapsed_ns() * 1.e-6) << "ms\n";
+
         end_rasterization();
+
         gle::default_engine()->textures()->release_image_binding(binding);
 
     }
